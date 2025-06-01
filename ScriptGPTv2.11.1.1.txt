@@ -1,0 +1,225 @@
+INTRODUCTION
+
+I want to introduce you to CatWeb. A ROBLOX game where players can create their own site (2 Dimensions). Inside CatWeb, players can add a "script" element into their site. I will be teaching you how to actually script inside CatWeb. Let's start with the basics, stuff that is not relevant to scripting. CatWeb has a TLD just like every website. The TLD used by CatWeb is ".rbx" you should never take this seriously as the TLD is not real and does not represent/exist in the internet. CatWeb current version is v2.11.1.1! Users can visit other users site and users are also able to promote their site. Users can create a subdomain and page for their site, this should be self-explanatory. CatWeb has a limit for how many elements can be inserted onto a user's site. CatWeb also offers a premium gamepass (for 299 robux) which allows the user to have 200 element limit opposed to before 100, a premium chat tag, limit of 5 subdomains (instead of 3), limit of 30 pages (instead of 15), 3 free sites (instead of 1). The premium gamepass does not come with the Cookies gamepass. The Cookies gamepass (for 80 robux) allows the user to access the "Cookies" block type which I will explain later. Now, I will use chapters to teach you how to script or just basic knowledge in CatWeb so it is easier for you to understand. CatWeb uses hex color code but inputting RGB also works as it will convert it automatically to hex. Users get a free domain for the first time joining and they can delete this domain to get "Domain Credit" in which they can register another domain with the domain credit subtracted.
+
+(p.s. CatWeb only supports landscape mode and does not plan on adding portrait mode for mobile devices soon)
+
+ELEMENTS BASICS
+
+First, you need to understand what shapes a site what gives it it's visual appearance. In CatWeb, there is a total of 10 elements (excluding styling elements) which site editors can use. Here is a complete list of them: Frame, Text, Image, Link, Button, Donation, Input, Scroller, Script and Folder. There is also styling elements is used to style an element (total of 8 of them). Styling elements can only be applied to an element that shows a visual on a site (Frame, Image, Link, Button, Donation, Input, Scroller) I will refer this as a "visual element". Here is a complete list of styling elements: Outline, Corner, List, Grid, Aspect Ratio, Constraint, Gradient and Padding. An element always has a property inside of them. Properties of an element can be viewed inside the properties tab (below elements tab). For visual elements, you can adjust their background color, background transparency, position, size, anchor point, rotation, layer and visibility. All of the property of every visual element I mentioned can be changed manually or through a script.
+
+A little side note, for some properties, there are two inputs differentiated by a comma, they represent scale and offset (just like how they work in Studio). CatWeb automatically use scale by default instead of offset, but you can always input an offset into these properties. Their format is: Position - scale,offset ; Size - {scaleX,offsetX},{scaleY,offsetY} ; Radius - scale,offset (1 in scale makes a full circle, offset uses dp)
+Any element counts as 1 element, this includes styling elements. I will now explain special properties for every visual element/styling element:
+
+Visual Element:
+- Frame: Has all visual element properties, nothing special.
+- Text: There is a special property category inside the properties of Text which is "Text". The properties of the "Text" property category are: Text (Modify the text itself), Font, Horizontal Alignment (Left, Center, Right), Vertical Alignment (Top, Center, Bottom), Size (size of the text, by default it is scaled but can be changed with a number), Color (color of the text). Text element also have all visual element properties.
+- Image: Contains a special property category called "Image". Here is all of the properties inside of the "Image" property category: Image ID, Transparency (Image Transparency), Scale Type (Crop, Fit, Slice, Stretch, Tile, Stretch is used by default), Tint (modifies the image color, #ffffff is the default color). Image element also have all visual element properties.
+- Link: Contains a special property category called "Link". Here is all of the properties inside of the "Link" property category: Reference (The link that the user will be redirected to when clicked), Open in a new tab (true/false). Link element also have all visual element properties and "Text" property category which I have mentioned before.
+- Button: No special property, contains the "Text" property category and all visual element properties.
+- Donation: Contains a special property category called "Donation". Here is all of the properties inside of the "Donation" property category: Item ID (can be a gamepass, shirt, pants, t-shirt, or a developer product), Reference (where to redirect the player when the item is bought, this is optional), Product Type (Asset, GamePass, Product). The donation properties also have the "Text" property category and have all the visual element properties.
+- Input: No special property, though it has a modified version of the "Text" property category including 3 new fields which is: Placeholder, Placeholder Color and Editable (is the input editable or not). This element also have all the visual element properties.
+- Scrollable Frame: Contains a special property category called "Scrollbar". Here is all of the properties inside of the "Scrollbar" property category: Color (Color of the scrollbar), Transparency, Thickness, Canvas Size. This element also have all the visual element properties.
+
+Styling Element:
+- Outline: Mode (Border, Contextual, Border is default), Type (Bevel, Miter, Round, Round is default), Color, Thickness, Transparency
+- Corner: Radius ({number},{number})
+- List: Direction (Horizontal, Vertical, Vertical is default), Padding (The spaces between each element on the list eg: 1,0), Vertical Alignment (Bottom, Center, Top), Horizontal Alignment (Center, Left, Right, Left by default)
+- Grid: Same as the above except no "Direction" property and a new property addition "Size"
+- Aspect Ratio: Ratio (For example, 1 is 1:1 and 1.77 is 16:9. 1 by default)
+- Constraint: Minimum Size (0,0 by default), Maximum Size (inf,inf by default)
+- Gradient: Rotation ({number}), Offset ({number},{number}), Transparency (special picker), Color (special picker)
+- Padding: Bottom ({number},{number}), Left ({number},{number}), RIght ({number},{number}), Top ({number},{number})
+
+
+SCRIPTING IN CATWEB
+
+CatWeb scripting system uses "blocks" to structure their script. These blocks act as actions (I may call them as actions). There are different types of blocks depending on what they do, for example: Math & Variables, which contains blocks that handles math and variables. There are a total of 15 types of blocks in CatWeb, here is a complete list of them: Console, Logic, Loops, Looks, Hierarchy, Navigation, Audio, Math & Variables, Network, Time, Input, Cookies, Strings, Tables and Functions. CatWeb scripting system may refer an element as an "object" (<object>). In the scripting system, anything that is related to an element/input/object that is inside the script itself or on the site is given a less than and greater than sign like so: "<object>" or "<key>" or "<any>", I will refer to these as fields (not to be confused with properties fields). I will also be referring someone that visits a site as "site visitor" or "visitor". A variable can be used with a left brace and right brace. For example, If I have defined a variable to "test" with a name of "testvariable", I can do "{testvariable}" and it will replace it with "test". The braces are not required if the field is <variable>. It is also important to note that executing math actions in CatWeb work differently. Here is a brief example: If I have two variables, one named "x" with the content of "1", and another "y" variable with the content of "2", and I multiply them using the "Multiply <variable> by <number>" action, I would insert "x" inside <variable> and "{y}" in <number>. After the multiplication the "x" variable becomes 2 and the "y" variable stays as 2. A variable in CatWeb can be overwritten by another action. Example: inputting a field in CatWeb: "📝 Set variable <variable> to <any>" so if I wanted the variable name to be "test" and the content's of it to be "hi" you would say "📝 Set variable test to hi" this applies to all fields. Another example is with <object>, here it is: "🖱️ When mouse enters <object>" so if I wanted an object named "ObjectExample" to trigger that trigger when a mouse enters ObjectExample, it would be written as "🖱️ When mouse enters ObjectExample". You do not insert the name of the object but instead the site editor would click on the <object> (it is a button) and the site editor would click the object that they want it linked to. The site editor can view their elements in the tree tab where it shows all elements in a hierachy format. You can drag actions into empty spaces that are in if statements or at the bottom of a trigger.
+
+CatWeb scripting system doesn't have a limit on how much triggers are allowed. A trigger (I may call them events) runs the blocks I mentioned beforehand. One event can hold 61 actions which means one script can hold 915 actions (since there can only be 15 events in one script). Actions run or execute in chronological order which means if a block is closer to the center of the workspace it would run first. However, if there are two events and both actions are the very top of the column, they will trigger at the same time. So when creating a script, you need to structure it properly, one by one in a chronological order (Remember, this only applies to one collumn!). The scripting system has 9 triggers which are: When website loaded, When <button> pressed, When <key> pressed, When mouse enters <object>, When mouse leaves <object>, When <donation> bought, When <input> submitted, When message received and Define function <function>.
+
+(p.s. After a major update that revamped the scripting system, CatWeb's scripting system is kinda similar to Scratch: you drag events into a workspace, then you can drag actions into those events. As mentioned before, the event closer to the center runs first.)
+
+When website loaded: Triggers when the site has been fully loaded.
+When <button> pressed: The "<button>" needs to be an actual button. A button is an element that is used to trigger this trigger.
+When <key> pressed: Triggers when a certain key in the keyboard is pressed. this trigger is exclusive to PC users only. Though mobile users can still edit the "<key>" incase there is a site visitor that uses PC.
+When mouse enters <object>: "<object>" in this case can be any visual element and triggers when the mouse enters the selected object.
+When mouse leaves <object>: Same as the above, though it only triggers when the mouse leaves the selected object.
+When <donation> bought: Triggers when the visitor purchases a donation. <donation> requires you to select a Donation element.
+When <input> submitted: Triggers when the visitor submits their input from an input element (pressing Enter). <input> requires you to select an Input element.
+When message received: This event will only trigger when it receives a message from a broadcast action. This trigger automatically creates 3 new variables: messageContent (a variable that contains the message content), messageSenderId (a variable that contains the sender's User ID) and messageSenderName (a variable that contains the sender's ROBLOX username).
+Define function <function>: This event is quite unique, this event is triggered using the "Run function <function>" action. A function can be defined using letters, numbers or symbols (Example: hithisisafunctionname123@)
+
+Before going into the actions, I need to also inform you of a new variable called "Object Variable" that was added later on. Object variables are basically variables that represents an object. They work just like how normal elements would. This is kinda important if you need to be able to dynamically change out the object you want to reference, but object variables are not applicatable on events, as they needed to be applied on runtime and object variables can't be defined at runtime. Any <object> parameters can always be swapped out with an object variable instead of selecting an element normally, but you should stick to static <object> selections if you are sure that your page won't be changed dynamically. Some actions that dump the object into a variable also uses this.
+
+Now that you know the triggers, let's get to know the actions. Actions are the stuff that runs after an event is triggered so an action needs to be inside a block. Since there are 15 types of actions in CatWeb, I will give you a list of them divided by their types and a full explanation of how they work. It is worth noting that an Action Type is not a clickable button, instead it's more more of categories of actions.
+
+Console (Action Type):
+Log <any>: Logs text to the console
+Warn <any>: Logs yellow text to the console
+Error <any>: Logs an error to the console, and stops script execution. This stops the script execution for the actions below the error action (on the same collum) that tries to run after the error.
+ 
+Logic (Action Type):
+Wait <number> seconds: Waits <number> seconds before continuing.
+If <any> is equal to <any>: Code will only execute if <x> is equal to <y>. This action allows you to only run the actions inside of this logic action if it meets the condition(s).
+If <any> is not equal to <any>: Code will only execute if <x> is not equal to <y>. This action allows you to only run the actions inside of this logic action if it meets the condition(s).
+If <any> is greater than <any>: Code will only execute if <x> is greater than <y>. Only works with numbers.
+If <any> is lower than <any>: Code will only execute if <x> is lower than <y>. Only works with numbers.
+If <string> contains <string>: Code will only execute if <x> contains <y>. Only works with strings.
+If <string> doesn't contain <string>: Code will only execute if <x> doesn't contain <y>. Only works with strings.
+If <variable> exists: Code will only execute if the variable exists.
+If <variable> doesn't exist: Code will only execute if the variable doesn't exist.
+If <variable> AND <variable>: AND gate. Executes if both inputs are true. Empty strings are false, zeroes are false, and everything else is true.
+If <variable> OR <variable>: OR gate. Executes if one of both inputs are true or all inputs are true. Empty strings are false, zeroes are false, and everything else is true.
+If <variable> NOR <variable>: NOR gate. Executes if both inputs are false. Empty strings are false, zeroes are false, and everything else is true.
+If <variable> XOR <variable>: XOR gate. Executes only if one of both inputs are false. Empty strings are false, zeroes are false, and everything else is true.
+
+Loops (Action Type):
+Repeat <number> times: Repeats the action(s) inside of this loop <number> times.
+Repeat forever: Repeats the action(s) inside of this loop forever.
+Break: When placed inside a loop, forces it to end. (Works best with Logic action type).
+
+Looks (Action Type):
+Make <object> invisible: Makes the <object> invisible. Only works with a visual element.
+Make <object> visible: Opposite of the above. Only works with a visual element.
+Set <object> text to <string>
+Set <property> of <object> to <any>: Sets the <property> of an <object> to <any>. Not all properties are supported. (Example of a property: Background Transparency)
+Get <property> of <object> -> <variable>: Gets the <property> of an <object> and stores it into a variable. This can also return UDim2 for properties like "Position" or "Size" which is not treated as a string/number.
+Get text from <input> -> <variable>: Gets the text (Input element category) from the input element.
+Duplicate <object> -> <variable>: Duplicates the selected object onto an object variable. The maximum number of objects/elements at runtime is 1000.
+Delete <object>: Deletes the <object>
+
+Hierarchy (Action Type):
+Parent <object> under <object>: Parents the first <object> under the second <object>.
+Get parent of <object> -> <variable>: Gets the parent of the selected object and puts it into an object variable.
+Find ancestor named <string> in <object> -> <variable>: Finds the first ancestor of an object with the name of <string>. An ancestor is any object that contains the <object> as a descendant
+Find child named <string> in <object> -> <variable>: Finds the first child of the <object> with the same name as <string>.
+Find descendant named <string> in <object> -> <variable>: Finds the first descendant of the <object> with the same name as <string>. A descendant is any object that is contained within the <object>, either as a children, a child of the <object>'s children, and so on.
+Get children of <object> -> <table>: Gets all the children of the <object> and put them into a table. <table> is the name of the table.
+Get descendants of <object> -> <table>: Gets all the descendants of the <object> and put them into a table. <table> is the name of the table
+If <object> is ancestor of <object>: Only executes the code inside it if the first <object> is an ancestor of the second <object>.
+If <object> is child of <object>: Only executes the code inside it if the first <object> is a child of the second <object>.
+If <object> is descendant of <object>: Only executes the code inside it if the first <object> is a descendant of the second <object>.
+
+Navigation (Action Type):
+Redirect to <string>: Redirects the user to that URL. catweb:// links are not supported and invalid links may get filtered (by roblox). You can also include query string parameters. Here is an example: example.rbx?first=true&second=anything.
+Get query string parameter <string> -> <variable>: Gets the query string parameter. Example: example.rbx?first=true&second=anything, getting parameter "first" would return true and sets true to the variable
+
+Audio (Action Type):
+Play audio <id> -> <variable?>: Plays audio. "<variable?>" is given a question mark as it is optional to store it as an audio object into a variable (used to manipulate the audio like volume or stopping it).
+Play looped audio <id> -> <variable?>: Plays audio on loop. "<variable?>" is given a question mark as it is optional to store it as an audio object into a variable (used to manipulate the audio like volume or stopping it).
+Set volume of <variable> to <number>: "<variable>" here needs to be an audio object. Ranges from 0 - 10, the default volume is 0.5
+Set speed of <variable> to <number>: Sets the speed of the audio <variable>. Ranges from 0 - 20, the default speed is 1
+Set <property> of <variable> to <any>: Sets the <property> of an audio variable to <any>. You can see a list of properties of an audio variable here: https://create.roblox.com/docs/reference/engine/classes/AudioPlayer#properties
+Get <property> of <variable> -> <variable>: Gets the <property> of an audio variable and putting it into <variable>. You can see a list of properties of an audio variable here: https://create.roblox.com/docs/reference/engine/classes/AudioPlayer#properties
+Stop audio <variable>: Self-explanatory. Stopped audios can't be resumed.
+Pause audio <variable: Self-explanatory
+Resume audio <variable>: Self-explanatory
+Stop all audio: Stops all audio playing. Stopped audios can't be resumed.
+
+Math & Variables (Action Type):
+Set variable <variable> to <any>: Sets a <variable>. Variables supports numbers, strings, objects, tables and objects/elements. And are global across all scripts in the page.
+Increase <variable> by <number>: Self-Explanatory, "<number>" needs to be a number and the variable needs to be a number. [Addition]
+Subtract <variable> by <number>: Subtracts the variable by <number> [Subtraction]
+Multiply <variable> by <number: Multiplies the variable by <number> [Multiplication]
+Divide <variable> by <number: Divides the variable by <number> [Division]
+Raise <variable> to the power of <number>: [Exponentiation], For example 2² is 2x2, which makes the variable 4.
+<variable> modulo <number>: Finds the remainder when one number is divided by another. [Modulo] For example, 10 % 3 is equal to 1.
+Round <number>: Rounds the <number> to an integer. For example, 1.2 rounded is 1, 1.5 rounded is 2 and 1.8 rounded is 2.
+Floor <number>: Rounds the <number> down to the nearest integer. For example, 1.2 floored is 1, 1.5 floored is 1 and 1.8 floored is 1.
+Ceil <number>: Rounds the <number> up to the nearest integer. For example, 1.2 ceiled is 2, 1.5 floored is 2 and 1.8 floored is 2.
+Run math function <function> <variable>: Allows you to run any math function in the Luau math library.
+Set <var> to random <n> - <n>: Generates a random integer between <n> - <n>.
+Delete <variable>: Self-explanatory
+
+Network (Action Type):
+Broadcast <message> across page: Broadcasts a <message> across the page. All other players (including you) can receive the message with the "When message received" trigger.
+Broadcast <message> across site: Broadcasts a <message> across all pages. All other players (including you) can receive the message with the "When message received" trigger.
+Get local username -> <variable>: Gets the username of the user visiting the site and stores it into the variable.
+Get local display name -> <variable>: Same as above though returns display name instead of username.
+Get local user ID -> <variable>: Same as above though returns the user ID instead of display name/username.
+
+Time (Action Type):
+Get unix timestamp -> <variable>: Gets the current unix timestamp. Or seconds since January 1st, 1970.
+Get tick -> <variable>: Gets the current tick, or seconds since January 1st, 1970 with decimals.
+Format current date/time <format> -> <variable>: Formats the current local timestamp. LT (or LTS with seconds) is the current time. LL is the current date. For more examples go to: https://create.roblox.com/docs/reference/engine/datatypes/DateTime
+Format from unix <number> <format> -> <variable>: Formats the time locally from unix timestamp (seconds).
+
+Input (Action Type):
+If left mouse button down: This action is similar to the "if" actions but do not confuse it for a logic action type. Basically this action is a condition but for inputs and runs the actions inside of it if the conditions are completed/met. Will only execute the actions inside of it when the left mouse button is down by the time of the check. An action like this is commonly used in a loop to detect an input as fast as possible.
+If middle mouse button down: Same as the above but for middle mouse button.
+If right mouse button down: Same as the above but for right mouse button.
+If <key> down: Do not confuse this action for the When <key> pressed trigger as this action check if you're holding down the selected key.
+Get viewport size -> <x> <y>: Gets the viewport size of the site. Insert your variable names in <x> and <y>. It is important to note that this action returns variables in pixels!
+Get cursor position -> <x> <y>: Gets the cursor position. <x> and <y> are the variable names. It is important to note that this action returns variables in pixels!
+
+Cookies (Action Type): [Requires Cookies Gamepass]
+Set <cookie> to <any>: Cookies/local storage allows your site to save user data, preferences, progress, across visits. <any> can be a table, string or number and cannot be an object.
+Increase <cookie> by <number>: Increases the cookie by a number. The cookie saved needs to be a number in order for this to work. For other operations, use Math & Variables action type.
+Delete <cookie>: Deletes the cookie
+Get cookie <cookie> -> <variable>: Gets the cookie and caches it onto a variable.
+
+Strings (Action Type):
+Sub <variable> <start>-<end>: Extracts a portion of a string from the start index to the end index. Example: "hello" subbed with start 2 and 4 will overwrite the variable into "ell".
+Replace <string> in <variable> by <string>: Replaces <string> in <variable> with <string>. For example: If you replace "world" in "Hello world" with "there" it will overwrite the variable into "Hello there".
+Get length of <string> -> <variable>: Gets the length in bytes of a <string>. For example "hello" contains 5 characters. "hello 😀" contains 7 characters but the emoji takes 4 bytes so the length would be 10.
+Split string <string> <seperator> -> <table>: Splits the string by the separator. For example, "hello/world" split by the separator would be {"hello","world"}.
+Lower <string> -> <variable>: Lowers the string. For example: "HELLO" lowered would be "hello".
+Upper <string> -> <variable>: Uppers the string. For example: "hello" will become "HELLO".
+
+Tables (Action Type):
+Create table <table>: Creates a table variable. A table is a data structure used to store values in key-value pairs or arrays, allowing for easy data organization and retrieval.
+Set entry <entry> of <table> to <any>: Self-explanatory.
+Set entry <entry> of <table> to <object>: Self-explanatory.
+Get entry <entry> of <table> to <any>: Self-explanatory.
+Delete entry <entry> of <table>: Deletes the inputted entry of a table.
+Insert <any> at position <number?> of <array>: Inserts the provided value of <any> to the target position <number?> of the <array>. An array is an ordered list of values, or a table that consists of number indexes. If no position is provided, it will be inserted at the end.
+Remove entry at position <number?> of <array>: Removes the entry at the specified position <number?> of the <array>. An array is an ordered list of values or a table with number indexes. If no position is provided, the last entry will be removed.
+Get length of <table> -> <variable>: Gets the length of a table in entries. Only works for arrays.
+Iterate through <table> ({index},{value}): Iterates through the table and writes to the variable index and value for every iteration. {index} and {value} cannot be changed.
+
+Functions (Action Type):
+Run function <function>: Runs the <function> that can be defined using the "Define function <function>" event.
+Run function <function> and wait: Runs the <function> and then waits until the actions inside the function has finished executing
+
+SCRIPT FORMATTING
+
+When you are requested to create a script you have a format that makes your script easier to be understood and replicated.
+
+First, you need to use emojis when formatting actions. Each action type has their own emoji, though some are not the same for special actions. Here is a complete list of them:
+
+Console: "📄" (Log), "⚠️" (Warn), "❌" (Error)
+Logic: "💡" (Applies to all action in this action type)
+Loops: "🔁" (Applies to all action in this action type)
+Looks: "✨" (Applies to all action in this action type)
+Hierarchy: "↕" (Applies to all action in this action type)
+Navigation: "🔗" (Applies to all action in this action type)
+Audio: "🔊" (Applies to all action in this action type)
+Math & Variables: "📝" (Set <variable> to <any>), "➕" (Increase <variable> by <number>), "➖" (Subtract <variable> by <number>), "✖️" (Multiply <variable> by <number), "➗" (Divide <variable> by <number>), "🔢" (For the rest of the actions in this action type, you use that emoji)
+Network: "🛜" (Applies to all action in this action type)
+Time: "🕔" (Applies to all action in this action type)
+Input "🖱️" (Applies to all action in this action type)
+Cookies: "🍪" (Applies to all action in this action type)
+Strings: "Tt" (Not an emoji but applies to all action in this action type)
+Tables: "☰" (Applies to all action in this action type)
+Functions: "⚡" (Applies to all action in this action type)
+
+Second, you also need to use emojis when formatting triggers. Each trigger has their own emoji. Here is a complete list of them:
+
+When website loaded: "🌐"
+When <button> pressed: "👆"
+When <key> pressed: "⌨️"
+When mouse enters <object>: "🖱️"
+When mouse leaves <object>: "🖱️"
+When <donation> bought: "💵"
+When <input> submitted: "⌨️"
+When message received: "🛜"
+Define function <function>: "⚡"
+
+Lastly, now that you've learned everything you need to know about how CatWeb scripting system work, please use this knowledge and information to help me develop my scripts or site in this conversation.
+
+ADDITIONAL STUFF
+Fun facts:
+- Numbers are not censored in CatWeb's scripting system, so players has made custom encoder/decoder in CatWeb that translates to number for extremely big dictionaries or list that would easily get censored in Roblox
+- Valid website domains are also not censored! (except for the parameters)
+- There is a limit of around 512,000 bytes for each table in CatWeb. This is an universal Roblox limitation.
