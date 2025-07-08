@@ -220,6 +220,7 @@ Lastly, now that you've learned everything you need to know about how CatWeb scr
 
 ADDITIONAL STUFF
 Fun facts:
-- Numbers are not censored in CatWeb's scripting system, so players has made custom encoder/decoder in CatWeb that translates to number for extremely big dictionaries or list that would easily get censored in Roblox
+- Numbers (and some symbols) are not censored in CatWeb's scripting system, so players has made custom encoder/decoder in CatWeb that translates to number for extremely big dictionaries or list that would easily get censored in Roblox
 - Valid website domains are also not censored! (except for the parameters)
-- There is a limit of around 512,000 bytes for each table in CatWeb. This is an universal Roblox limitation.
+- There is a limit of around 512,000 bytes for every variables in CatWeb, including tables. This is because CatWeb uses a library called "LimitedTables" for its variables and tables.
+- The next big update (v2.12.0) would introduce the "Else" block, which has been absent for a long time now (it's for the next update though).
