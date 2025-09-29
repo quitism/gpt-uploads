@@ -1680,7 +1680,6 @@ function generateRandomGlobalId() {
 }
 
 function getSignatureFromElement(element) {
-		console.log(element)
     const clone = element.cloneNode(true);
     clone.querySelectorAll('input.field').forEach(input => {
         const placeholderText = document.createTextNode(input.placeholder);
@@ -1872,32 +1871,140 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const contextMenu = document.querySelector('.context-menu');
 
-  document.querySelector('.canvas').addEventListener('click', (e) => {
-    const trashBtn = e.target.closest('.icon-btn.trash');
-    if (trashBtn) {
-        const node = trashBtn.closest('.node');
-        if (node) {
-            const action = {
-                type: 'delete_node',
-                element: node,
-                parent: node.parentElement,
-                nextSibling: node.nextElementSibling,
-                execute: function() {
-                    this.parent.removeChild(this.element);
-                },
-                undo: function() {
-                    if (this.nextSibling) {
-                        this.parent.insertBefore(this.element, this.nextSibling);
-                    } else {
-                        this.parent.appendChild(this.element);
-                    }
+  // Add event listeners for context menu buttons
+  contextMenu.querySelector('.context-menu-button.delete').addEventListener('click', () => {
+    const targetActionId = contextMenu.dataset.targetActionId;
+    if (targetActionId) {
+      const targetAction = document.querySelector(`[data-context-id="${targetActionId}"]`);
+      if (targetAction) {
+        const parentNode = targetAction.closest('.node');
+        const nextSibling = targetAction.nextElementSibling;
+
+        const action = {
+            type: 'delete_action',
+            actionUid: targetAction.dataset.uid,
+            actionHTML: targetAction.outerHTML,
+            parentNodeUid: parentNode ? parentNode.dataset.uid : null,
+            nextSiblingUid: nextSibling ? nextSibling.dataset.uid : null,
+            execute: function() {
+                const elementToRedelete = document.querySelector(`[data-uid="${this.actionUid}"]`);
+                if (elementToRedelete) {
+                    const parentNodeElement = elementToRedelete.closest('.node');
+                    elementToRedelete.remove();
+                    if (parentNodeElement) updateNodeSpaces(parentNodeElement);
                 }
-            };
-            action.execute();
-            recordAction(action);
-        }
-        return;
+            },
+            undo: function() {
+                const parentNodeElement = document.querySelector(`[data-uid="${this.parentNodeUid}"]`);
+                if (!parentNodeElement) return;
+
+                const parentBody = parentNodeElement.querySelector('.node-body');
+                const nextSiblingElement = this.nextSiblingUid ? document.querySelector(`[data-uid="${this.nextSiblingUid}"]`) : null;
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = this.actionHTML;
+                const recreatedAction = tempDiv.firstElementChild;
+
+                recreatedAction.querySelectorAll('.field').forEach(field => {
+                    field.addEventListener('input', () => resizeInput(field));
+                    resizeInput(field);
+                });
+
+                parentBody.insertBefore(recreatedAction, nextSiblingElement);
+                updateNodeSpaces(parentNodeElement);
+            }
+        };
+        action.execute();
+        recordAction(action);
+        contextMenu.style.display = 'none';
+        delete targetAction.dataset.contextId; // Clean up temporary ID
+      }
     }
+  });
+
+  contextMenu.querySelector('.context-menu-button.duplicate').addEventListener('click', () => {
+    const targetActionId = contextMenu.dataset.targetActionId;
+    if (targetActionId) {
+      const targetAction = document.querySelector(`[data-context-id="${targetActionId}"]`);
+      if (targetAction) {
+        // Implement duplicate logic here
+        const duplicatedAction = targetAction.cloneNode(true);
+        // Generate new UID for the duplicated action
+        duplicatedAction.dataset.uid = generateUniqueId();
+        // Remove temporary context ID from the duplicated action
+        delete duplicatedAction.dataset.contextId;
+        targetAction.after(duplicatedAction); // Insert after the original
+        const parentNode = targetAction.closest('.node');
+        if (parentNode) updateNodeSpaces(parentNode);
+        contextMenu.style.display = 'none';
+        delete targetAction.dataset.contextId; // Clean up temporary ID
+      }
+    }
+  });
+
+  contextMenu.querySelector('.context-menu-button.comment').addEventListener('click', () => {
+    const targetActionId = contextMenu.dataset.targetActionId;
+    if (targetActionId) {
+      const targetAction = document.querySelector(`[data-context-id="${targetActionId}"]`);
+      if (targetAction) {
+        // Implement add comment logic here
+        const commentAction = document.createElement('div');
+        commentAction.classList.add('node-action');
+        commentAction.dataset.uid = generateUniqueId(); // Assign a new UID
+        commentAction.innerHTML = `
+          <div class="node-icon-container">
+            <span class="material-icons" style="color:rgb(191,206,174)">mode_comment</span>
+          </div>
+          <input class="field comment" placeholder="Comment...">
+        `;
+        targetAction.after(commentAction); // Insert after the original
+        const parentNode = targetAction.closest('.node');
+        if (parentNode) updateNodeSpaces(parentNode);
+        contextMenu.style.display = 'none';
+        delete targetAction.dataset.contextId; // Clean up temporary ID
+      }
+    }
+  });
+
+  document.querySelector('.canvas').addEventListener('click', (e) => {
+		const trashBtn = e.target.closest('.icon-btn.trash');
+		if (trashBtn) {
+				const node = trashBtn.closest('.node');
+				if (node) {
+						const action = {
+								type: 'delete_node',
+								nodeUid: node.dataset.uid,
+								nodeHTML: node.outerHTML, 
+								parent: node.parentElement,
+								nextSibling: node.nextElementSibling,
+								execute: function() { 
+										const elementToRedelete = document.querySelector(`[data-uid="${this.nodeUid}"]`);
+										if (elementToRedelete) {
+												elementToRedelete.parentElement.removeChild(elementToRedelete);
+										}
+								},
+								undo: function() { 
+										const tempDiv = document.createElement('div');
+										tempDiv.innerHTML = this.nodeHTML;
+										const recreatedNode = tempDiv.firstElementChild; // <<< FIXED
+										
+										recreatedNode.querySelectorAll('.field').forEach(field => {
+												field.addEventListener('input', () => resizeInput(field));
+												resizeInput(field);
+										});
+
+										if (this.nextSibling && this.parent.contains(this.nextSibling)) {
+												this.parent.insertBefore(recreatedNode, this.nextSibling);
+										} else {
+												this.parent.appendChild(recreatedNode);
+										}
+								}
+						};
+						action.execute();
+						recordAction(action);
+				}
+				return;
+		}
 
     const duplicateBtn = e.target.closest('.icon-btn.duplicate');
     if (duplicateBtn) {
@@ -1941,6 +2048,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!action) return;
 
     e.preventDefault();
+
+    // Assign a temporary ID to the target action and store it in the context menu
+    const tempId = 'context-action-' + Date.now();
+    action.dataset.contextId = tempId;
+    contextMenu.dataset.targetActionId = tempId;
 
     const mouseX = e.clientX;
     const mouseY = e.clientY;
@@ -2380,26 +2492,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
 
-                    if (foundSpace) {
-                        const newAction = createActionFromBlock(draggingSidebarBlock);
-                        foundSpace.parentNode.insertBefore(newAction, foundSpace);
-                        updateNodeSpaces(foundSpace.closest('.node'));
-                        const action = {
-                            type: 'add_action',
-                            element: newAction,
-                            parent: foundSpace.parentNode,
-                            nextSibling: foundSpace.nextElementSibling, // The element after the placeholder
-                            execute: function() {
-                                this.parent.insertBefore(this.element, this.nextSibling);
-                            },
-													undo: function() {
-															if (this.element && this.element.parentNode === this.parent) {
-																	this.parent.removeChild(this.element);
+											if (foundSpace) {
+													const newAction = createActionFromBlock(draggingSidebarBlock);
+													foundSpace.parentNode.insertBefore(newAction, foundSpace);
+													updateNodeSpaces(foundSpace.closest('.node'));
+
+													const action = {
+															type: 'add_action',
+															element: newAction,               // DOM node reference
+															parent: foundSpace.parentNode,    // parent at creation time
+															nextSibling: foundSpace.nextElementSibling || null,
+															execute: function() {
+																	// re-check parent; if original parent no longer in DOM, try to re-resolve it
+																	if (!this.parent || !this.parent.contains) {
+																			// fallback: try to find parent again via document (if you can identify it by dataset)
+																			// else abort gracefully
+																	}
+																	try {
+																			// If element already in DOM, move it to correct place
+																			if (this.element && this.element.parentNode !== this.parent) {
+																					this.parent.insertBefore(this.element, this.nextSibling || null);
+																			} else if (this.element && !this.element.parentNode) {
+																					this.parent.insertBefore(this.element, this.nextSibling || null);
+																			}
+																	} catch (e) {
+																			// swallow errors — fail gracefully
+																	}
+															},
+															undo: function() {
+																	// Remove element only if it's still attached to its parent (safe)
+																	if (this.element && this.element.parentNode) {
+																			this.element.parentNode.removeChild(this.element);
+																	}
 															}
+														};
+														recordAction(action);
 													}
-                        };
-                        recordAction(action);
-                    }
                     // Always remove the dragging element, whether placed or not
                     draggingSidebarBlock.remove();
                 }
@@ -2415,39 +2543,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		if (draggingAction) {
 				if (isOverSidebar || isOverHeader) {
-						// Store references BEFORE removing from DOM
 						const actionElement = draggingAction;
-						const parentElement = draggingAction.parentElement;
-						const nextSibling = draggingAction.nextElementSibling;
-						const node = draggingAction.closest('.node');
-						
-						// Create the delete action BEFORE removing from DOM
+						const parentNode = actionElement.closest('.node');
+						const nextSibling = actionElement.nextElementSibling;
+
 						const action = {
 								type: 'delete_action',
-								element: actionElement,
-								parent: parentElement,
-								nextSibling: nextSibling,
-								node: node,
-								execute: function() {
-										if (this.element && this.parent && this.parent.contains(this.element)) {
-												this.parent.removeChild(this.element);
-												if (this.node) updateNodeSpaces(this.node);
+								actionUid: actionElement.dataset.uid,
+								actionHTML: actionElement.outerHTML,
+								parentNodeUid: parentNode.dataset.uid,
+								nextSiblingUid: nextSibling ? nextSibling.dataset.uid : null,
+
+								execute: function() { // Redo the delete
+										const elementToRedelete = document.querySelector(`[data-uid="${this.actionUid}"]`);
+										if (elementToRedelete) {
+												const parentNodeElement = elementToRedelete.closest('.node');
+												elementToRedelete.parentElement.removeChild(elementToRedelete);
+												if (parentNodeElement) updateNodeSpaces(parentNodeElement);
 										}
 								},
-								undo: function() {
-										if (this.element && this.parent) {
-												if (this.nextSibling && this.parent.contains(this.nextSibling)) {
-														this.parent.insertBefore(this.element, this.nextSibling);
-												} else {
-														this.parent.appendChild(this.element);
-												}
-												if (this.node) updateNodeSpaces(this.node);
-										}
+								undo: function() { // Undo the delete
+										const parentNodeElement = document.querySelector(`[data-uid="${this.parentNodeUid}"]`);
+										if (!parentNodeElement) return; 
+
+										const parentBody = parentNodeElement.querySelector('.node-body');
+										const nextSiblingElement = this.nextSiblingUid ? document.querySelector(`[data-uid="${this.nextSiblingUid}"]`) : null;
+										
+										const tempDiv = document.createElement('div');
+										tempDiv.innerHTML = this.actionHTML;
+										const recreatedAction = tempDiv.firstElementChild; // <<< FIXED
+										
+										recreatedAction.querySelectorAll('.field').forEach(field => {
+												field.addEventListener('input', () => resizeInput(field));
+												resizeInput(field);
+										});
+
+										parentBody.insertBefore(recreatedAction, nextSiblingElement);
+										updateNodeSpaces(parentNodeElement);
 								}
 						};
 						action.execute();
 						recordAction(action);
-        } else {
+				} else {
             let foundSpace = null;
             document.querySelectorAll('.node-space').forEach(space => {
                 const rect = space.getBoundingClientRect();
@@ -2476,30 +2613,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalParent = draggingAction.parentElement;
             const finalNextSibling = draggingAction.nextElementSibling;
 
-            if (draggingActionInitialParent !== finalParent || draggingActionInitialNextSibling !== finalNextSibling) {
-                recordAction({
-                    type: 'move_action',
-                    element: draggingAction,
-                    oldParent: draggingActionInitialParent,
-                    oldIndex: Array.from(draggingActionInitialParent.children).indexOf(draggingAction),
-                    newParent: finalParent,
-                    newIndex: Array.from(finalParent.children).indexOf(draggingAction),
-                    execute: function() {
-                        if (this.newParent.children.length > this.newIndex) {
-                            this.newParent.insertBefore(this.element, this.newParent.children[this.newIndex]);
-                        } else {
-                            this.newParent.appendChild(this.element);
-                        }
-                    },
-                    undo: function() {
-                        if (this.oldParent.children.length > this.oldIndex) {
-                            this.oldParent.insertBefore(this.element, this.oldParent.children[this.oldIndex]);
-                        } else {
-                            this.oldParent.appendChild(this.element);
-                        }
-                    }
-                });
-            }
+					if (draggingActionInitialParent !== finalParent || draggingActionInitialNextSibling !== finalNextSibling) {
+							recordAction({
+									type: 'move_action',
+									element: draggingAction,
+									oldParent: draggingActionInitialParent,
+									oldNextSibling: draggingActionInitialNextSibling,
+									newParent: finalParent,
+									newNextSibling: finalNextSibling,
+									execute: function() { // Redo the move
+											if (this.newParent) {
+													// Check if the sibling is still a valid child of the parent
+													const sibling = this.newNextSibling && this.newParent.contains(this.newNextSibling) ? this.newNextSibling : null;
+													this.newParent.insertBefore(this.element, sibling);
+													// Update drop targets for both affected nodes
+													if(this.oldParent) updateNodeSpaces(this.oldParent.closest('.node'));
+													if(this.newParent) updateNodeSpaces(this.newParent.closest('.node'));
+											}
+									},
+									undo: function() { // Undo the move
+											if (this.oldParent) {
+													const sibling = this.oldNextSibling && this.oldParent.contains(this.oldNextSibling) ? this.oldNextSibling : null;
+													this.oldParent.insertBefore(this.element, sibling);
+													// Update drop targets for both affected nodes
+													if(this.oldParent) updateNodeSpaces(this.oldParent.closest('.node'));
+													if(this.newParent) updateNodeSpaces(this.newParent.closest('.node'));
+											}
+									}
+							});
+					}
 
 			// Reset dragged action styles
 			draggingAction.style.position = '';
@@ -2638,31 +2780,45 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('focusout', (e) => {
-      if (currentFocusedField && e.target === currentFocusedField) {
-          const newValue = e.target.value || e.target.textContent;
-          if (currentFocusedFieldOldValue !== newValue) {
-              const targetElement = currentFocusedField.closest('.node, .node-action');
-              recordAction({
-                  type: 'change_field',
-                  elementUid: targetElement.dataset.uid,
-                  fieldElement: currentFocusedField, // Keep direct reference
-                  oldValue: currentFocusedFieldOldValue,
-                  newValue: newValue,
-                  execute: function() {
-                      this.fieldElement.value = this.newValue;
-                      this.fieldElement.textContent = this.newValue;
-                      resizeInput(this.fieldElement);
-                  },
-                  undo: function() {
-                      this.fieldElement.value = this.oldValue;
-                      this.fieldElement.textContent = this.oldValue;
-                      resizeInput(this.fieldElement);
-                  }
-              });
-          }
-          currentFocusedField = null;
-          currentFocusedFieldOldValue = '';
-      }
+		if (currentFocusedField && e.target === currentFocusedField) {
+				const newValue = e.target.value || e.target.textContent;
+				if (currentFocusedFieldOldValue !== newValue) {
+						const targetElement = currentFocusedField.closest('.node, .node-action');
+						// Find the index of the field within its parent action/node
+						const allFieldsInParent = Array.from(targetElement.querySelectorAll('.field'));
+						const fieldIndex = allFieldsInParent.indexOf(currentFocusedField);
+
+						recordAction({
+								type: 'change_field',
+								parentUid: targetElement.dataset.uid, // Use the parent's UID
+								fieldIndex: fieldIndex,               // Use the field's index
+								oldValue: currentFocusedFieldOldValue,
+								newValue: newValue,
+								execute: function() {
+										const parentEl = document.querySelector(`[data-uid="${this.parentUid}"]`);
+										if (parentEl) {
+												const field = parentEl.querySelectorAll('.field')[this.fieldIndex];
+												if (field) {
+														field.value = this.newValue;
+														resizeInput(field);
+												}
+										}
+								},
+								undo: function() {
+										const parentEl = document.querySelector(`[data-uid="${this.parentUid}"]`);
+										if (parentEl) {
+												const field = parentEl.querySelectorAll('.field')[this.fieldIndex];
+												if (field) {
+														field.value = this.oldValue;
+														resizeInput(field);
+												}
+										}
+								}
+						});
+				}
+				currentFocusedField = null;
+				currentFocusedFieldOldValue = '';
+		}
   });
 
   document.querySelectorAll('.field').forEach(field => {
