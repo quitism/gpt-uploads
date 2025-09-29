@@ -1,0 +1,3089 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<title>Visual Script Editor</title>
+<style>
+:root{
+	--bg:#141414;
+	--panel:#151515;
+	--muted:#2a2a2a;
+	--accent:#8be4ff;
+	--text:#ffffff;
+	--card:#1c1c1c;
+}
+/* ===== Base Styles ===== */
+* {
+    box-sizing: border-box; 
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 360;
+}
+
+html, body {
+    height: 100%;
+}
+
+/* ===== Icon System ===== */
+.material-icons, 
+.material-symbols-outlined, 
+.material-symbols-rounded {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease;
+}
+
+/* Circle button icons */
+.circle .material-icons,
+.circle .material-symbols-outlined {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+/* Context menu icons */
+.context-icon .material-icons,
+.context-icon .material-symbols-outlined {
+    margin-right: 8px;
+}
+
+/* Topbar action icons */
+.topbar-action .material-icons {
+    font-size: 22px;
+}
+
+/* ===== Icon Variations ===== */
+.material-icons.filled,
+.material-symbols-outlined.filled {
+    font-variation-settings: 'FILL' 1;
+}
+
+/* Icon weights */
+.material-icons.weight-600,
+.material-symbols-outlined.weight-600,
+.material-symbols-rounded.weight-600 {
+    font-variation-settings: 'wght' 600;
+}
+
+/* Icon sizes */
+.material-icons.size-24,
+.material-symbols-outlined.size-24 {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.material-icons.size-28,
+.material-symbols-outlined.size-28 {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+}
+
+/* UI and Dropdown Icons */
+.dropdown-arrow .material-icons {
+    font-size: 18px;
+    margin-right: 4px;
+    color: rgba(255, 255, 255, 0.5);
+		font-variation-settings:
+		'FILL' 0,
+		'wght' 400,
+		'GRAD' 0,
+		'opsz' 24
+}
+
+.down-icon .material-icons {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.icon-btn .material-symbols-outlined {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.2s ease;
+}
+
+.icon-btn:hover .material-symbols-outlined {
+    color: rgb(255, 255, 255);
+}
+
+/* Block icon colors */
+.block-icon.event, .nav-button.event { color: rgb(255,196,58); }
+.block-icon.log, .nav-button.log { color: rgb(255,255,255); }
+.block-icon.logic, .nav-button.logic { color: rgb(255,168,61); }
+.block-icon.loops, .nav-button.loops { color: rgb(255,82,47); }
+.block-icon.looks, .nav-button.looks { color: rgb(164,74,255); }
+.block-icon.hierarchy, .nav-button.hierarchy { color: rgb(214,175,255); }
+.block-icon.navigation, .nav-button.navigation { color: rgb(90,182,239); }
+.block-icon.math-variables, .nav-button.math-variables { color: rgb(107,188,52); }
+.block-icon.audio, .nav-button.audio { color: rgb(255,44,100); }
+.block-icon.input, .nav-button.input { color: rgb(130,212,130); }
+.block-icon.network, .nav-button.network { color: rgb(231,204,48); }
+.block-icon.cookies, .nav-button.cookies { color: rgb(255,143,52); }
+.block-icon.time, .nav-button.time { color: rgb(191,138,255); }
+.block-icon.color, .nav-button.color { color: rgb(223,94,167); }
+.block-icon.strings, .nav-button.strings { color: rgb(212,213,128); }
+.block-icon.tables, .nav-button.tables { color: rgb(213,127,84); }
+.block-icon.functions, .nav-button.functions { color: rgb(225,76,63); }
+
+/* Comment icon color */
+.node-icon-container .material-icons.mode-comment {
+    color: rgb(191,206,174);
+}
+
+/* JSON name style */
+.json-name {
+    font-weight: 700;
+}
+
+body{
+	margin:0;
+	background-color:var(--bg);
+	color:var(--text);
+	user-select:none;
+	overflow:hidden;
+	font-size:16px;
+}
+::-webkit-scrollbar {
+	width: 1px;
+	height: 1px;
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background-color: rgba(255, 255, 255, 0.2);
+	border-radius: 1px;
+}
+
+* {
+	scrollbar-width: thin; /* makes scrollbar thinner */
+	scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* topbar */
+.header{
+	position:fixed;
+	left:0;
+	right:0;
+	top:0;
+	height:67px;
+	display:flex;
+	align-items:center;
+	gap:14px;
+	padding:0 10px;
+	background:#000000;
+	border-bottom:1px solid rgba(255,255,255,0.03);
+	z-index:40;
+}
+.project-name{
+	font-weight:600;
+	font-size:15px;
+}
+.header .meta{
+	margin-left:12px;
+	background:rgba(255,255,255,0.02);
+	padding:6px 10px;
+	border-radius:999px;
+	font-size:13px;
+	color:#cfcfcf;
+	display:inline-flex;
+	align-items:center;
+	gap:8px;
+}
+.header-buttons{margin-left:auto;display:flex;align-items:center}
+.save-btn{
+	display: flex;
+	max-width:116px;
+	width: 80px;
+	height:51px;
+	background:#2a91ff;
+	border-radius:9999px 0 0 9999px;
+	margin-right: 3px;
+	cursor:default;
+	font-size:125%;
+	justify-content: center;
+	align-items: center;
+	border:unset;
+}
+.save-btn span {
+	font-weight: 600;
+}
+
+/* left sidebar */
+.sidebar{
+	position:fixed;
+	left:0;
+	top:67px;
+	width:524px;
+	height:100vh;
+	background:rgba(20,20,20,0.85);
+	display:flex;
+	flex-direction:column;
+	gap:10px;
+	z-index:50;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px}
+.logo{
+	width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#121214,#202125);
+	display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;
+}
+.sidebar .section-title{margin-left:70px;margin-top:10px;font-weight:500;font-size:15px;padding-left:10px}
+.blocks{
+	overflow:auto;
+	padding-right:8px;
+	display:flex;
+	flex-direction:column;
+	gap:8px;
+}
+.block{
+	max-width: 488px;
+	height: 44px;
+	background:#0F0F0F;
+	padding-left: 8px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border-radius:6px;
+	display:flex;
+	gap:10px;
+	align-items:center;
+	font-size:16px;
+	cursor:grab;
+	margin-left: 71px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.block .tag{background:rgba(255,255,255,0.03);padding:4px 8px;border-radius:6px;font-weight:700;font-size:12px}
+
+/* canvas area */
+.canvas{
+	position:absolute;
+	left:0px;
+	top:0px;
+	right:0;
+	bottom:0;
+	overflow:hidden;
+	transform-origin:0 0;
+}
+
+/* node */
+.node{
+	position:absolute;
+	left:420px;
+	top:110px;
+	min-width:425px;
+	background:#000000;
+	border-radius:10px;
+	padding:12px;
+}
+.node-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* keep actions on the right */
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.node-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 400;
+  font-size: 15px;
+  white-space: nowrap;
+  padding-bottom: 30px;
+}
+.node-actions{display:flex;gap:8px;align-items:center}
+.node-body{
+	background:#000000;
+	border-radius:8px;border:1px solid rgba(255,255,255,0.02)
+}
+.node-action{
+	display:flex;
+	align-items:center;
+	margin-bottom:8px;
+	background: #0F0F0F;
+	height: 44px;
+	padding-left: 10px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border-radius:6px;
+	display:flex;
+	align-items:center;
+	font-size:16px;
+	cursor:grab;
+	transition: background 0.15s;
+}
+.node-action:hover {
+	background: #0a0a0a !important;
+	opacity: 1 !important;
+}
+
+.port{
+	width:14px;height:14px;border-radius:4px;
+	border:1px solid rgba(255,255,255,0.04);
+	margin-right:8px;
+}
+
+/* right floating controls */
+.right-controls{
+	position:fixed;
+	right:20px;
+	bottom:36px;
+	display:flex;
+	flex-direction:column;
+	gap:12px;
+	z-index:60;
+}
+.left-controls{
+	position:fixed;
+	left:540px;
+	bottom:36px;
+	display:flex;
+	flex-direction:column;
+	gap:12px;
+	z-index:60;
+}
+.circle{
+	width:54px;height:54px;border-radius:999px;background:#000000;display:flex;align-items:center;justify-content:center;
+	cursor:default;
+}
+.zoom{font-weight:700;font-size:20px}
+
+.json-name {
+	padding-left: 10px;
+	padding-right: 20px;
+	font-size:18px;
+	background: #0f0f0f;
+	border-radius: 8px;
+	height: 46px;
+	display: flex;
+	align-items: center;
+	object-fit: contain;
+}
+
+/*
+trying to replace these spritesheets (all of them) with SVGs (WAS originally material icons, but ill use material symbols for the ones that barely changed), here's all of them (please also keep the tint and their og size, and maybe remove the containing div as we dont need the mask trick anymore):
+* block icons:
+- events: flash_on filled
+- log: code
+- logic: lightbulb filled
+- repeat: autorenew
+- looks: dvr filled
+- hierarchy: wrap_text
+- navigation: link
+- math-variables: calculate filled
+- audio: volume_up filled
+- input: mouse filled
+- network: wifi rounded 600 weight
+- cookie: cookie
+- time: schedule
+- color: palette
+- strings: text_fields
+- tables: list
+- functions: deployed_code
+* circle buttons:
+- zoom in: zoom_in 48px optical size (or zoom_in from material icons for best accuracy)
+- zoom out: zoom_out 48px optical size (or zoom_out from material icons for best accuracy)
+- center: equal
+- collapse: chevron_left
+* topbar buttons:
+- undo & redo: undo and redo from material icons (best accuracy)
+- dropdown icon: keyboard_arrow_down
+* context menu icons:
+- delete: delete filled
+- duplicate: content_copy filled
+- add comment: add_comment filled
+* inner dropdown menu icons (for next update):
+- text editor: open_in_new
+- variable: calculate filled
+*/
+/* ===== Block Icons ===== */
+.block-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Block icon colors */
+.block-icon.event { color: rgb(255,196,58); }
+.block-icon.log { color: rgb(255,255,255); }
+.block-icon.logic { color: rgb(255,168,61); }
+.block-icon.loops { color: rgb(255,82,47); }
+.block-icon.looks { color: rgb(164,74,255); }
+.block-icon.hierarchy { color: rgb(214,175,255); }
+.block-icon.navigation { color: rgb(90,182,239); }
+.block-icon.math-variables { color: rgb(107,188,52); }
+.block-icon.audio { color: rgb(255,44,100); }
+.block-icon.input { color: rgb(130,212,130); }
+.block-icon.network { color: rgb(231,204,48); }
+.block-icon.cookies { color: rgb(255,143,52); }
+.block-icon.time { color: rgb(191,138,255); }
+.block-icon.color { color: rgb(223,94,167); }
+.block-icon.strings { color: rgb(212,213,128); }
+.block-icon.tables { color: rgb(213,127,84); }
+.block-icon.functions { color: rgb(225,76,63); }
+.category {
+	border-top-left-radius: 8px;
+	position:fixed;
+	left:0;
+	width:71px;
+	height:calc(100vh - 68px);
+	background:rgba(20,20,20,0.85);
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	padding:7px;
+	z-index:50;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.nav-button {
+	display:flex;
+	height:53px;
+	width:53px;
+	min-height: 53px;
+	align-items:center;
+	justify-content:center;
+	background:#ffffff00;
+	border:none;
+	border-radius:8px;
+	margin-bottom:5px;
+	margin-top:5px;
+	margin-left: 3px;
+}
+/* ===== Navigation Icons ===== */
+.nav-button {
+    display: flex;
+    height: 53px;
+    width: 53px;
+    min-height: 53px;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    margin: 5px 3px;
+    transition: background 0.2s ease;
+}
+
+.nav-button:hover {
+    background: rgba(33,33,33,0.85);
+}
+
+/* Nav icon colors */
+.nav-button.event { color: rgb(255,196,58); }
+.nav-button.log { color: rgb(255,255,255); }
+.nav-button.logic { color: rgb(255,168,61); }
+.nav-button.loops { color: rgb(255,82,47); }
+.nav-button.looks { color: rgb(164,74,255); }
+.nav-button.hierarchy { color: rgb(214,175,255); }
+.nav-button.navigation { color: rgb(90,182,239); }
+.nav-button.math-variables { color: rgb(107,188,52); }
+.nav-button.audio { color: rgb(255,44,100); }
+.nav-button.input { color: rgb(130,212,130); }
+.nav-button.network { color: rgb(231,204,48); }
+.nav-button.cookies { color: rgb(255,143,52); }
+.nav-button.time { color: rgb(191,138,255); }
+.nav-button.color { color: rgb(223,94,167); }
+.nav-button.strings { color: rgb(212,213,128); }
+.nav-button.tables { color: rgb(213,127,84); }
+.nav-button.functions { color: rgb(225,76,63); }
+.field {
+	display: inline-block;
+	background: #141414;
+	padding-left: 8px;
+	padding-right: 8px;
+	padding-top: 4px;
+	height: 28px;
+	color: #B2B2B2;
+	border-radius: 0px;
+	border: none;
+	outline: none;
+	margin-left: 4px;
+	margin-right: 4px;
+	font-size: 15px;
+}
+.topbar-action {
+	width: 24px;
+	height: 24px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 9999px;
+	margin: 0 10px;
+}
+
+.btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: default;
+}
+
+.undo img {
+	width: 19.7px;
+	height: 19.7px;
+	transform: scale(1.8);
+	object-fit: none;
+	object-position: -48px -229px;
+}
+
+.redo img {
+	width: 19.7px;
+	height: 19.7px;
+	transform: scale(1.8);
+	object-fit: none;
+	object-position: -180.5px -31.7px;
+}
+
+/* ===== Control Buttons ===== */
+.circle {
+    opacity: 0.8;
+    transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.circle:hover {
+    opacity: 1;
+}
+
+.circle.collapse .material-symbols-outlined {
+    margin-left: -2px;
+}
+
+.circle.center .material-symbols-outlined {
+    font-size: 28px;
+}
+
+/* Maintain consistent sizing for zoom controls */
+.circle.zoom-in .material-icons,
+.circle.zoom-out .material-icons {
+    font-size: 28px;
+}
+.separator {
+	width: calc(100% - 72px);
+	margin-left: 69px;
+	height: 1px;
+	background: rgba(255, 255, 255, 0.1);
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+.vertical-separator {
+	width:1px;
+	height:24px;
+	background:rgba(255,255,255,0.2);
+	margin-right: 10px;
+	margin-left: 10px
+}
+
+.dropdown-btn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: #2a91ff;
+	border-radius: 0 9999px 9999px 0;
+	cursor: default;
+	border: unset;
+	width: 45px;
+	height: 51px;
+}
+.dropdown-icon {
+	width: 42px;
+	height: 42px;
+	overflow: hidden;
+}
+.dropdown-arrow img {
+	width: 36px;
+	height: 36px;
+	object-fit: none;
+	object-position: -378px -168px;
+	margin-right: 8px;
+	transform: scale(calc(20/36));
+}
+.dropdown-icon.for-json {
+	width: 42px;
+	height: 42px;
+	overflow: hidden;
+}
+.dropdown-arrow.for-json img {
+	width: 36px;
+	height: 36px;
+	object-fit: none;
+	object-position: -378px -168px;
+	transform: scale(calc(20/36));
+}
+.events-count {
+	font-size: 15px;
+	margin-right: 5px;
+}
+.node-icon-container {
+	width: 24px;
+	height: 24px;
+	overflow: hidden;
+	flex-shrink: 0;
+}
+/* ===== Node Icons & Actions ===== */
+.node-icon-container {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.node-icon.comment {
+    color: rgb(191, 206, 174);
+}
+
+.node-space {
+    display: flex;
+    align-items: center;
+    background: #0F0F0F;
+    height: 40px;
+    max-height: 40px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.down-icon {
+	width: 20px;
+	height: 20px;
+	overflow: hidden;
+	flex-shrink: 0;
+	justify-items: center;
+	align-items: center;
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	margin-top: 40px;
+	margin-bottom: 15px;
+}
+.down-icon img {
+	width: 19px;
+	height: 19px;
+	object-fit: contain;
+	opacity: 0.75;
+}
+.icon-btn.duplicate {
+	white-space: nowrap;
+	padding-bottom: 50px;
+	width: 24px;
+	height: 24px;
+	overflow: hidden;
+}
+.icon-btn.duplicate img {
+	width: 108px;
+	height: 24px;
+	object-fit: contain;
+	object-position: -72px 0px;
+}
+.icon-btn.trash {
+	white-space: nowrap;
+	padding-bottom: 50px;
+	width: 24px;
+	height: 24px;
+	overflow: hidden;
+	margin-right: 5px;
+}
+.icon-btn.trash img {
+	width: 108px;
+	height: 24px;
+	object-fit: contain;
+	object-position: -48px 0px;
+}
+.context-menu {
+	top: 300px;
+	left: 500px;
+	position: absolute;
+	background: rgb(20, 20, 20);
+	outline: 0.75px solid rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	padding: 8px 4px;
+	display: none;
+	flex-direction: column;
+	gap: 4px;
+	z-index: 99999;
+	width: 350px;
+
+}
+.inner-dropdown-menu {
+	top: 300px;
+	left: 500px;
+	position: absolute;
+	background: rgb(20, 20, 20);
+	outline: 0.75px solid rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	padding: 8px 4px;
+	display: none;
+	flex-direction: column;
+	gap: 4px;
+	z-index: 99999;
+	width: 350px;
+}
+.context-menu-button {
+	background: transparent;
+	border-radius: 4px;
+	color: #ffffff;
+	font-size: 14px;
+	text-align: left;
+	white-space: nowrap;
+	align-items: center;
+	display: flex;
+	gap: 4px;
+	width: 100%;
+	min-height: 32px;
+	height: 32px;
+	max-height: 32px;
+	border: unset;
+}
+.context-menu-button:hover {
+	background: rgba(255, 255, 255, 0.08);
+}
+.context-icon {
+	display: flex;
+	width: 24px;
+	height: 24px;
+	overflow: hidden;
+	flex-shrink: 0;
+	align-items: center;
+}
+/* ===== Context Menu & Dropdowns ===== */
+.context-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+}
+
+.dropdown-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown-arrow .material-icons {
+    font-size: 24px;
+    opacity: 0.8;
+}
+
+.viewport {
+	position: relative;
+	width: 9992px;
+	height: 9992px;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect y='0' width='30' height='2' fill='%231f1f1f'/><rect x='0' width='2' height='30' fill='%231f1f1f'/></svg>");
+	background-repeat: repeat;
+	background-color: transparent;
+	overflow: hidden;
+}
+
+.inner-dropdown-menu.any {
+	width: 16px;
+	height: 16px;
+	padding-left: 12px;
+}
+
+.resize-handle {
+	position: absolute;
+	height: 100%;
+	width: 4px;
+	right: 0;
+	top: 0;
+	background: rgb(42, 145, 255);
+	transition: opacity 0.1s cubic-bezier(0.4,0,0.2,1);
+	opacity: 0%;
+}
+.resize-handle:hover {
+	opacity: 80%;
+}
+.resize-handle:active {
+	opacity: 100%;
+	cursor: ew-resize;
+}
+
+/* ===== Sidebar slide + collapse icon spin ===== */
+.sidebar {
+  transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.left-controls {
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  will-change: transform;
+}
+
+.sidebar-items {
+	overflow-y: auto;
+	margin-bottom: 71px;
+	transition: opacity 0.2s ease-in-out;
+}
+
+/* default (visible) - no transform needed */
+
+/* collapsed state lives on body as .sidebar-collapsed */
+body.sidebar-collapsed .sidebar {
+  width: 71px;
+}
+body.sidebar-collapsed .sidebar-items {
+    opacity: 0;
+    pointer-events: none;
+}
+/* left-controls initially at left:540px — translate left so collapse icon follows */
+body.sidebar-collapsed .left-controls {
+  transform: translateX(-459px);
+}
+
+/* collapse icon rotate - rotates when body.sidebar-collapsed present */
+.left-controls .collapse .icon img {
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  transform-origin: 50% 50%;
+}
+body.sidebar-collapsed .left-controls .collapse{
+  transform: rotate(180deg);
+}
+
+/* ===== node-space drag-over highlight ===== */
+.node-space {
+  transition: background 0.12s;
+}
+.node-space.drag-over {
+  background: #161616;
+}
+
+/* ===== circle buttons pressed / disabled ===== */
+/* "buttons" are .circle divs — pressed state while mouse down */
+.circle:active {
+  background: #4c4c4c !important;
+  transition: background 0.06s;
+}
+.circle.disabled {
+  background: #666666 !important;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* ===== save / dropdown hover & active ===== */
+.save-btn:hover, .dropdown-btn:hover {
+  background: #1d65b3 !important;
+}
+.save-btn:active, .dropdown-btn:active {
+  background: #6ab2ff !important;
+}
+
+/* (if you want pointer to show clickable) */
+.save-btn, .dropdown-btn { cursor: pointer; }
+
+/* ===== sidebar blocks hover ===== */
+.block:hover {
+  background: #0a0a0a;
+}
+
+/* ===== node-action already had hover; keep that behavior ===== */
+
+/* ===== json-name hover / pressed ===== */
+.json-name:hover {
+  background: #0a0a0a;
+}
+.json-name:active {
+  background: #575757;
+  color: inherit;
+}
+
+.dragging {
+  position: absolute;
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* Node Space */
+.node-space {
+  min-height: 8px;
+  margin: 4px 0;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: min-height 0.2s ease;
+}
+
+.node-space.active {
+  min-height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Animation for node unfolding ===== */
+.node.unfolding {
+    transform-origin: center top;
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+</style>
+</head>
+<body>
+	<aside class="sidebar" aria-hidden="true">
+			<div class="category">
+					<button class="nav-button event"><span class="material-symbols-outlined filled">flash_on</span></button>
+					<button class="nav-button log"><span class="material-symbols-outlined">code</span></button>
+					<button class="nav-button logic"><span class="material-symbols-outlined filled">lightbulb</span></button>
+					<button class="nav-button loops"><span class="material-symbols-outlined">autorenew</span></button>
+					<button class="nav-button looks"><span class="material-symbols-outlined filled">dvr</span></button>
+					<button class="nav-button hierarchy"><span class="material-symbols-outlined">wrap_text</span></button>
+					<button class="nav-button navigation"><span class="material-symbols-outlined">link</span></button>
+					<button class="nav-button math-variables"><span class="material-symbols-outlined filled">calculate</span></button>
+					<button class="nav-button audio"><span class="material-symbols-outlined filled">volume_up</span></button>
+					<button class="nav-button input"><span class="material-symbols-outlined filled">mouse</span></button>
+					<button class="nav-button network"><span class="material-symbols-rounded filled weight-600">wifi</span></button>
+					<button class="nav-button cookies"><span class="material-symbols-outlined filled">cookie</span></button>
+					<button class="nav-button time"><span class="material-symbols-outlined filled">schedule</span></button>
+					<button class="nav-button color"><span class="material-symbols-outlined filled">palette</span></button>
+					<button class="nav-button strings"><span class="material-symbols-outlined">text_fields</span></button>
+					<button class="nav-button tables"><span class="material-symbols-outlined">list</span></button>
+					<button class="nav-button functions"><span class="material-symbols-outlined filled">deployed_code</span></button>
+			</div>
+			
+			<!-- Events -->
+			<div class="sidebar-items">
+				<div class="section-title">Events</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon event"><span class="material-symbols-outlined filled">flash_on</span></div>
+									<span>When website loaded...</span>
+							</div>
+							<div class="block">
+									<div class="block-icon event"><span class="material-symbols-outlined filled">flash_on</span></div>
+									<span>When <input type="text" class="field" placeholder="&lt;button&gt;" spellcheck="false"> pressed...</span>
+							</div>
+							<div class="block">
+									<div class="block-icon event"><span class="material-symbols-outlined filled">flash_on</span></div>
+									<span>When <input type="text" class="field" placeholder="&lt;key&gt;" spellcheck="false"> pressed...</span>
+							</div>
+							<div class="block">
+									<div class="block-icon event"><span class="material-symbols-outlined filled">flash_on</span></div>
+									<span>When mouse enters <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false">...</span>
+							</div>
+							<div class="block">
+									<div class="block-icon event"><span class="material-symbols-outlined filled">flash_on</span></div>
+									<span>When mouse leaves <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false">...</span>
+							</div>
+							<div class="block">
+									<div class="block-icon event"><span class="material-symbols-outlined filled">flash_on</span></div>
+									<span>When <input type="text" class="field" placeholder="&lt;donation&gt;" spellcheck="false"> bought...</span>
+							</div>
+							<div class="block">
+									<div class="block-icon event"><span class="material-symbols-outlined filled">flash_on</span></div>
+									<span>When <input type="text" class="field" placeholder="&lt;input&gt;" spellcheck="false"> submitted...</span>
+							</div>
+							                            <div class="block">
+							                                    <div class="block-icon event"><span class="material-symbols-outlined filled">flash_on</span></div>
+							                                    <span>When message received...</span>
+							                            </div>					</div>
+					
+					<!-- Console -->
+					<div class="section-title">Console</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon log"><span class="material-symbols-outlined">code</span></div>
+									<span>Log <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon log"><span class="material-symbols-outlined">code</span></div>
+									<span>Warn <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon log"><span class="material-symbols-outlined">code</span></div>
+									<span>Error <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Logic -->
+					<div class="section-title">Logic</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>Wait <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"> seconds</span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"> is equal to <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"> is not equal to <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"> is greater than <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"> is lower than <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> contains <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> doesn't contain <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> exists</span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> doesn't exist</span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> AND <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> OR <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> NOR <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> XOR <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon logic"><span class="material-symbols-outlined filled">lightbulb</span></div>
+									<span>else</span>
+							</div>
+					</div>
+					
+					<!-- Loops -->
+					<div class="section-title">Loops</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon loops"><span class="material-symbols-outlined">autorenew</span></div>
+									<span>Repeat <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"> times</span>
+							</div>
+							<div class="block">
+									<div class="block-icon loops"><span class="material-symbols-outlined">autorenew</span></div>
+									<span>Repeat forever</span>
+							</div>
+							<div class="block">
+									<div class="block-icon loops"><span class="material-symbols-outlined">autorenew</span></div>
+									<span>Break</span>
+							</div>
+					</div>
+					
+					<!-- Looks -->
+					<div class="section-title">Looks</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Make <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> invisible</span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Make <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> visible</span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Set <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> text to <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Set <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> image to <input type="text" class="field" placeholder="&lt;id&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Set <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> image to avatar of <input type="text" class="field" placeholder="&lt;userid&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;resolution?&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Set <input type="text" class="field" placeholder="&lt;property&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Get <input type="text" class="field" placeholder="&lt;property&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Get text from <input type="text" class="field" placeholder="&lt;input&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Tween <input type="text" class="field" placeholder="&lt;property&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"> - <input type="text" class="field" placeholder="&lt;time&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;style&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;direction&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Duplicate <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>Delete <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon looks"><span class="material-symbols-outlined filled">dvr</span></div>
+									<span>If dark theme enabled</span>
+							</div>
+					</div>
+					
+					<!-- Hierarchy -->
+					<div class="section-title">Hierarchy</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>Parent <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> under <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>Get parent of <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>Find ancestor named <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> in <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>Find child named <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> in <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>Find descendant named <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> in <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>Get children of <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>Get descendants of <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> is ancestor of <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> is child of <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon hierarchy"><span class="material-symbols-outlined">wrap_text</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> is descendant of <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Navigation -->
+					<div class="section-title">Navigation</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon navigation"><span class="material-symbols-outlined">link</span></div>
+									<span>Get URL -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon navigation"><span class="material-symbols-outlined">link</span></div>
+									<span>Redirect to <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon navigation"><span class="material-symbols-outlined">link</span></div>
+									<span>Get query string parameter <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Math & Variables -->
+					<div class="section-title">Math & Variables</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Set variable <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Increase <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> by <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Subtract <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> by <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Multiply <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> by <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Divide <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> by <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Raise <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> to the power of <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span><input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> modulo <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Round <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Floor <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Ceil <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Run math function <input type="text" class="field" placeholder="&lt;function&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;tuple&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Set <input type="text" class="field" placeholder="&lt;var&gt;" spellcheck="false"> to random <input type="text" class="field" placeholder="&lt;n&gt;" spellcheck="false"> - <input type="text" class="field" placeholder="&lt;n&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon math-variables"><span class="material-symbols-outlined filled">calculate</span></div>
+									<span>Delete <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Audio -->
+					<div class="section-title">Audio</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Play audio <input type="text" class="field" placeholder="&lt;id&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable?&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Play looped audio <input type="text" class="field" placeholder="&lt;id&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable?&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Set volume of <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Set speed of <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Set <input type="text" class="field" placeholder="&lt;property&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Get <input type="text" class="field" placeholder="&lt;property&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Stop audio <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Pause audio <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Resume audio <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon audio"><span class="material-symbols-outlined filled">volume_up</span></div>
+									<span>Stop all audio</span>
+							</div>
+					</div>
+					
+					<!-- Input -->
+					<div class="section-title">Input</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon input"><span class="material-symbols-outlined filled">mouse</span></div>
+									<span>If left mouse button down</span>
+							</div>
+							<div class="block">
+									<div class="block-icon input"><span class="material-symbols-outlined filled">mouse</span></div>
+									<span>If middle mouse button down</span>
+							</div>
+							<div class="block">
+									<div class="block-icon input"><span class="material-symbols-outlined filled">mouse</span></div>
+									<span>If right mouse button down</span>
+							</div>
+							<div class="block">
+									<div class="block-icon input"><span class="material-symbols-outlined filled">mouse</span></div>
+									<span>If <input type="text" class="field" placeholder="&lt;key&gt;" spellcheck="false"> down</span>
+							</div>
+							<div class="block">
+									<div class="block-icon input"><span class="material-symbols-outlined filled">mouse</span></div>
+									<span>Get viewport size -> <input type="text" class="field" placeholder="&lt;x&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;y&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon input"><span class="material-symbols-outlined filled">mouse</span></div>
+									<span>Get cursor position -> <input type="text" class="field" placeholder="&lt;x&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;y&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Network -->
+					<div class="section-title">Network</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon network"><span class="material-symbols-rounded filled weight-600">wifi</span></div>
+									<span>Broadcast <input type="text" class="field" placeholder="&lt;message&gt;" spellcheck="false"> across page</span>
+							</div>
+							<div class="block">
+									<div class="block-icon network"><span class="material-symbols-rounded filled weight-600">wifi</span></div>
+									<span>Broadcast <input type="text" class="field" placeholder="&lt;message&gt;" spellcheck="false"> across site</span>
+							</div>
+							<div class="block">
+									<div class="block-icon network"><span class="material-symbols-rounded filled weight-600">wifi</span></div>
+									<span>Get local username -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon network"><span class="material-symbols-rounded filled weight-600">wifi</span></div>
+									<span>Get local display name -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon network"><span class="material-symbols-rounded filled weight-600">wifi</span></div>
+									<span>Get local user ID -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Cookies -->
+					<div class="section-title">Cookies</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon cookies"><span class="material-symbols-outlined filled">cookie</span></div>
+									<span>Set <input type="text" class="field" placeholder="&lt;cookie&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon cookies"><span class="material-symbols-outlined filled">cookie</span></div>
+									<span>Increase <input type="text" class="field" placeholder="&lt;cookie&gt;" spellcheck="false"> by <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon cookies"><span class="material-symbols-outlined filled">cookie</span></div>
+									<span>Delete <input type="text" class="field" placeholder="&lt;cookie&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon cookies"><span class="material-symbols-outlined filled">cookie</span></div>
+									<span>Get cookie <input type="text" class="field" placeholder="&lt;cookie&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Time -->
+					<div class="section-title">Time</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon time"><span class="material-symbols-outlined filled">schedule</span></div>
+									<span>Get unix timestamp -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon time"><span class="material-symbols-outlined filled">schedule</span></div>
+									<span>Get server unix timestamp -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon time"><span class="material-symbols-outlined filled">schedule</span></div>
+									<span>Get tick -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon time"><span class="material-symbols-outlined filled">schedule</span></div>
+									<span>Get timezone -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon time"><span class="material-symbols-outlined filled">schedule</span></div>
+									<span>Format current date/time <input type="text" class="field" placeholder="&lt;format&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon time"><span class="material-symbols-outlined filled">schedule</span></div>
+									<span>Format from unix <input type="text" class="field" placeholder="&lt;number&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;format&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Color -->
+					<div class="section-title">Color</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon color"><span class="material-symbols-outlined filled">palette</span></div>
+									<span>Convert <input type="text" class="field" placeholder="&lt;hex&gt;" spellcheck="false"> to RGB -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon color"><span class="material-symbols-outlined filled">palette</span></div>
+									<span>Convert <input type="text" class="field" placeholder="&lt;hex&gt;" spellcheck="false"> to HSV -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon color"><span class="material-symbols-outlined filled">palette</span></div>
+									<span>Convert <input type="text" class="field" placeholder="&lt;RGB&gt;" spellcheck="false"> to hex -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon color"><span class="material-symbols-outlined filled">palette</span></div>
+									<span>Convert <input type="text" class="field" placeholder="&lt;HSV&gt;" spellcheck="false"> to hex -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon color"><span class="material-symbols-outlined filled">palette</span></div>
+									<span>Lerp <input type="text" class="field" placeholder="&lt;hex&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;hex&gt;" spellcheck="false"> by <input type="text" class="field" placeholder="&lt;alpha&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Strings -->
+					<div class="section-title">Strings</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon strings"><span class="material-symbols-outlined">text_fields</span></div>
+									<span>Sub <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;start&gt;" spellcheck="false">-<input type="text" class="field" placeholder="&lt;end&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon strings"><span class="material-symbols-outlined">text_fields</span></div>
+									<span>Replace <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> in <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"> by <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon strings"><span class="material-symbols-outlined">text_fields</span></div>
+									<span>Get length of <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon strings"><span class="material-symbols-outlined">text_fields</span></div>
+									<span>Split string <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;separator&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon strings"><span class="material-symbols-outlined">text_fields</span></div>
+									<span>Lower <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon strings"><span class="material-symbols-outlined">text_fields</span></div>
+									<span>Upper <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon strings"><span class="material-symbols-outlined">text_fields</span></div>
+									<span>Concatenate <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> with <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Tables -->
+					<div class="section-title">Tables</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Create table <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Set entry <input type="text" class="field" placeholder="&lt;entry&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Set entry <input type="text" class="field" placeholder="&lt;entry&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"> to <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Get entry <input type="text" class="field" placeholder="&lt;entry&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Delete entry <input type="text" class="field" placeholder="&lt;entry&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Insert <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"> at position <input type="text" class="field" placeholder="&lt;number?&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;array&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Remove entry at position <input type="text" class="field" placeholder="&lt;number?&gt;" spellcheck="false"> of <input type="text" class="field" placeholder="&lt;array&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Get length of <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Iterate through <input type="text" class="field" placeholder="&lt;table&gt;" spellcheck="false"> ({l!index},{l!value})</span>
+							</div>
+							<div class="block">
+									<div class="block-icon tables"><span class="material-symbols-outlined">list</span></div>
+									<span>Join <input type="text" class="field" placeholder="&lt;array&gt;" spellcheck="false"> using <input type="text" class="field" placeholder="&lt;string&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+					
+					<!-- Functions -->
+					<div class="section-title">Functions</div>
+					<div class="separator"></div>
+					<div class="blocks">
+							<div class="block">
+									<div class="block-icon functions event"><span class="material-symbols-outlined filled">deployed_code</span></div>
+									<span>Define function <input type="text" class="field" placeholder="<function>" spellcheck="false">...</span>
+							</div>
+							<div class="block">
+									<div class="block-icon functions"><span class="material-symbols-outlined filled">deployed_code</span></div>
+									<span>Run function in background <input type="text" class="field" placeholder="&lt;function&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;tuple&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon functions"><span class="material-symbols-outlined filled">deployed_code</span></div>
+									<span>Run function <input type="text" class="field" placeholder="&lt;function&gt;" spellcheck="false"> <input type="text" class="field" placeholder="&lt;tuple&gt;" spellcheck="false"> -> <input type="text" class="field" placeholder="&lt;variable?&gt;" spellcheck="false"></span>
+							</div>
+							<div class="block">
+									<div class="block-icon functions"><span class="material-symbols-outlined filled">deployed_code</span></div>
+									<span>Return <input type="text" class="field" placeholder="&lt;any&gt;" spellcheck="false"></span>
+							</div>
+					</div>
+				<div style="height: 64vh;"></div>
+			</div>
+	</aside>
+
+	<header class="header">
+		<div>
+			<div class="json-name" style="font-weight:700"><div class="dropdown-arrow for-json"><span class="material-icons">keyboard_arrow_down</span></div>name.json</div>
+		</div>
+		<div class="header-buttons">
+			<span class="events-count">Events: 1/60</span>
+			<div class="vertical-separator"></div>
+			<div class="btn"><div class="topbar-action undo"><span class="material-icons">undo</span></div></div>
+			<div class="btn"><div class="topbar-action redo"><span class="material-icons">redo</span></div></div>
+			<div class="vertical-separator"></div>
+			<button class="save-btn"><span>Save</span></button><button class="dropdown-btn"><div class="dropdown-arrow"><span class="material-icons">keyboard_arrow_down</span></div></button>
+		</div>
+	</header>
+
+	<main class="canvas" role="main">
+		<div class="viewport" aria-hidden="true">
+
+			<!-- <div class="node" id="node-static-1" role="article" style="left:4950px;top:4950px">
+				<div class="node-header">
+					<div style="display:flex;align-items:center;gap:12px">
+						<div class="node-title">When website loaded...</div>
+					</div>
+					<div class="down-icon">
+						<span class="material-icons">south</span>
+					</div>
+					<div class="node-actions">
+						<div class="icon-btn duplicate">
+							<span class="material-symbols-outlined">content_copy</span>
+						</div>
+						<div class="icon-btn trash">
+							<span class="material-symbols-outlined">delete</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="node-body" id="node-static-1-body">
+					<div class="node-action">
+						<div class="node-icon-container">
+							<span class="material-icons" style="color:rgb(191,206,174)">mode_comment</span>
+						</div>
+						<input class="field comment" placeholder="Comment...">
+					</div>
+				</div>
+				<div class="resize-handle"></div>
+			</div>
+
+			<div class="node" id="node-static-2" role="article" style="left:5100px;top:5100px">
+				<div class="node-header">
+					<div style="display:flex;align-items:center;gap:12px">
+						<div class="node-title">When website loaded...</div>
+					</div>
+					<div class="down-icon">
+						<span class="material-icons">south</span>
+					</div>
+					<div class="node-actions">
+						<div class="icon-btn duplicate">
+							<span class="material-symbols-outlined">content_copy</span>
+						</div>
+						<div class="icon-btn trash">
+							<span class="material-symbols-outlined">delete</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="node-body" id="node-static-2-body">
+					<div class="node-action">
+						<div class="node-icon-container">
+							<span class="material-icons" style="color:rgb(191,206,174)">mode_comment</span>
+						</div>
+						<input class="field comment" placeholder="Comment...">
+					</div>
+				</div>
+				<div class="resize-handle"></div>
+			</div>
+
+			           <div class="node" id="node-static-3" role="article" style="left:5000px;top:5300px">				<div class="node-header">
+					<div style="display:flex;align-items:center;gap:12px">
+						<div class="node-title">When <input type="text" class="field" placeholder="&lt;object&gt;" spellcheck="false"> pressed...</div>
+					</div>
+					<div class="down-icon">
+						<span class="material-icons">south</span>
+					</div>
+					<div class="node-actions">
+						<div class="icon-btn duplicate">
+							<span class="material-symbols-outlined">content_copy</span>
+						</div>
+						<div class="icon-btn trash">
+							<span class="material-symbols-outlined">delete</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="node-body" id="node-static-2-body">
+					<div class="node-action">
+						<div class="node-icon-container">
+							<span class="material-icons" style="color:rgb(191,206,174)">mode_comment</span>
+						</div>
+						<input class="field comment" placeholder="Comment...">
+					</div>
+				</div>
+				<div class="resize-handle"></div>
+			</div> -->
+
+		</div>
+	</main>
+
+	<div class="right-controls" aria-hidden="true">
+		<div class="circle center"><span class="material-symbols-outlined">equal</span></div>
+		<div class="circle zoom-in"><span class="material-icons" style="font-size:24px">zoom_in</span></div>
+		<div class="circle zoom-out"><span class="material-icons" style="font-size:24px">zoom_out</span></div>
+	</div>
+		<div class="left-controls" aria-hidden="true">
+		<div class="circle collapse"><span class="material-symbols-outlined" style="font-size: 28px">chevron_left</span></div>
+	</div>
+	<div class="context-menu">
+		<button class="context-menu-button delete"><div class="context-icon delete"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">delete</span></div><span>Delete</span></button>
+		<button class="context-menu-button duplicate"><div class="context-icon duplicate"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">content_copy</span></div><span>Duplicate</span></button>
+		<button class="context-menu-button comment"><div class="context-icon comment"><span class="material-icons">mode_comment</span></div><span>Add Comment</span></button>
+	</div>
+	<div class="inner-dropdown-menu">
+		<button class="context-menu-button text-editor"><div class="context-icon"><span class="material-symbols-outlined">open_in_new</span></div><span>Text Editor</span></button>
+		<button class="context-menu-button variable"><div class="context-icon"><span class="material-symbols-outlined">calculate</span></div><span>Variable</span></button>
+	</div>
+<script>
+function generateUniqueId() {
+    return 'uid-' + Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
+// New helper functions for saving
+function generateRandomGlobalId() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>/?~';
+    return Array(2).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+function getSignatureFromElement(element) {
+		console.log(element)
+    const clone = element.cloneNode(true);
+    clone.querySelectorAll('input.field').forEach(input => {
+        const placeholderText = document.createTextNode(input.placeholder);
+        input.parentNode.replaceChild(placeholderText, input);
+    });
+    return clone.textContent.trim().replace(/\s+/g, ' ');
+}
+
+function findIdBySignature(signature, isEvent) {
+    const map = isEvent ? eventIdMap : actionIdMap;
+    if (map.has(signature)) return map.get(signature);
+
+    const signatureWithEllipsis = signature + '...';
+    if (map.has(signatureWithEllipsis)) return map.get(signatureWithEllipsis);
+    
+    for (const [key, value] of map.entries()) {
+        if (key.endsWith('...') && signature === key.slice(0, -3).trim()) {
+            return value;
+        }
+    }
+    console.warn('Could not find ID for signature:', signature);
+    return null;
+}
+
+function parseTextAndParams(element) {
+    const items = [];
+    // For actions, content is inside a SPAN. For titles, it's direct children.
+    const container = element.querySelector('span') || element;
+
+    container.childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent.trim();
+            if (text) items.push(text);
+        } else if (node.tagName === 'INPUT' && node.classList.contains('field')) {
+            items.push({
+                value: node.value || '',
+                t: 'string', // Note: Type info like 'number' or 'object' is lost in the HTML and defaults to string.
+                l: node.placeholder.replace(/[<>]/g, ''),
+            });
+        }
+    });
+
+    const mergedItems = [];
+    let accumulatedString = '';
+    for (const item of items) {
+        if (typeof item === 'string') {
+            accumulatedString += (accumulatedString ? ' ' : '') + item;
+        } else {
+            if (accumulatedString) {
+                mergedItems.push(accumulatedString);
+                accumulatedString = '';
+            }
+            mergedItems.push(item);
+        }
+    }
+    if (accumulatedString) {
+        mergedItems.push(accumulatedString);
+    }
+    return mergedItems;
+}
+
+async function saveScript() {
+    const scriptContent = [];
+    const nodes = document.querySelectorAll('.viewport > .node');
+
+    nodes.forEach(nodeEl => {
+        const nodeTitleEl = nodeEl.querySelector('.node-title');
+        if (!nodeTitleEl || !nodeEl.id.startsWith('event-')) return;
+
+        const nodeObject = {
+            y: nodeEl.style.top.replace('px', ''),
+            x: nodeEl.style.left.replace('px', ''),
+            globalid: nodeEl.dataset.globalid, // Read globalid from data attribute
+            id: nodeEl.id.replace('event-', ''),   // Read and parse id from element's id
+            text: parseTextAndParams(nodeTitleEl),
+            actions: [],
+            width: nodeEl.style.width.replace('px', '') || '425',
+        };
+
+        const actionElements = nodeEl.querySelectorAll('.node-body > .node-action');
+        actionElements.forEach(actionEl => {
+            if (!actionEl.id.startsWith('action-')) return;
+            const actionObject = {
+                id: actionEl.id.replace('action-', ''),     // Read and parse id from element's id
+                text: parseTextAndParams(actionEl),
+                globalid: actionEl.dataset.globalid, // Read globalid from data attribute
+            };
+            nodeObject.actions.push(actionObject);
+        });
+
+        scriptContent.push(nodeObject);
+    });
+
+    const finalJSON = [{
+        class: 'script',
+        content: scriptContent,
+        globalid: 'FF'
+    }];
+
+    const jsonString = JSON.stringify(finalJSON, null, 2);
+
+    try {
+        const handle = await window.showSaveFilePicker({
+            types: [{
+                description: 'JSON Script File',
+                accept: { 'application/json': ['.json'] },
+            }],
+            suggestedName: 'script.json'
+        });
+        const writable = await handle.createWritable();
+        await writable.write(jsonString);
+        await writable.close();
+    } catch (err) {
+        if (err.name !== 'AbortError') {
+            console.error('Failed to save file:', err);
+            alert('Error: Could not save the file.');
+        }
+    }
+}
+
+let undoStack = [];
+let redoStack = [];
+
+function recordAction(action) {
+    undoStack.push(action);
+    redoStack = []; // Clear redo stack
+    updateUndoRedoButtons();
+}
+
+function updateUndoRedoButtons() {
+    document.querySelector('.undo').parentElement.classList.toggle('disabled', undoStack.length === 0);
+    document.querySelector('.redo').parentElement.classList.toggle('disabled', redoStack.length === 0);
+}
+
+document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+});
+  // Utility: update node-space at the end of actions if < 120 actions
+  function updateNodeSpaces(node) {
+    const nodeBody = node.querySelector('.node-body');
+    if (!nodeBody) return;
+
+    // Remove all node-spaces
+    nodeBody.querySelectorAll('.node-space').forEach(space => space.remove());
+
+
+    const actions = Array.from(nodeBody.querySelectorAll('.node-action'));
+    if (actions.length < 120) {
+        // Add node-space after last action if it doesn't exist
+        const lastElement = nodeBody.lastElementChild;
+        if (!lastElement || !lastElement.classList.contains('node-space')) {
+            const space = document.createElement('div');
+            space.className = 'node-space';
+            nodeBody.appendChild(space);
+        }
+    }
+  }
+document.addEventListener('DOMContentLoaded', () => {
+  updateUndoRedoButtons();
+
+  document.querySelector('.undo').addEventListener('click', () => {
+    if (undoStack.length > 0) {
+        const action = undoStack.pop();
+        action.undo();
+        redoStack.push(action);
+        updateUndoRedoButtons();
+    }
+  });
+
+  document.querySelector('.redo').addEventListener('click', () => {
+    if (redoStack.length > 0) {
+        const action = redoStack.pop();
+        action.execute();
+        undoStack.push(action);
+        updateUndoRedoButtons();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        document.querySelector('.undo').click();
+    }
+    if (e.ctrlKey && (e.key === 'y' || e.key === 'Y')) {
+        e.preventDefault();
+        document.querySelector('.redo').click();
+    }
+  });
+
+  const contextMenu = document.querySelector('.context-menu');
+
+  document.querySelector('.canvas').addEventListener('click', (e) => {
+    const trashBtn = e.target.closest('.icon-btn.trash');
+    if (trashBtn) {
+        const node = trashBtn.closest('.node');
+        if (node) {
+            const action = {
+                type: 'delete_node',
+                element: node,
+                parent: node.parentElement,
+                nextSibling: node.nextElementSibling,
+                execute: function() {
+                    this.parent.removeChild(this.element);
+                },
+                undo: function() {
+                    if (this.nextSibling) {
+                        this.parent.insertBefore(this.element, this.nextSibling);
+                    } else {
+                        this.parent.appendChild(this.element);
+                    }
+                }
+            };
+            action.execute();
+            recordAction(action);
+        }
+        return;
+    }
+
+    const duplicateBtn = e.target.closest('.icon-btn.duplicate');
+    if (duplicateBtn) {
+        const nodeToDuplicate = duplicateBtn.closest('.node');
+        if (nodeToDuplicate) {
+            const newNode = nodeToDuplicate.cloneNode(true);
+            
+            // Assign new unique and global IDs to the clone
+            newNode.dataset.uid = generateUniqueId();
+            newNode.dataset.globalid = generateRandomGlobalId();
+
+            const originalLeft = parseInt(nodeToDuplicate.style.left, 10) || 0;
+            const originalTop = parseInt(nodeToDuplicate.style.top, 10) || 0;
+            newNode.style.left = (originalLeft + 30) + 'px';
+            newNode.style.top = (originalTop + 30) + 'px';
+
+            newNode.querySelectorAll('.field').forEach(field => {
+                field.addEventListener('input', () => resizeInput(field));
+            });
+
+            const action = {
+                type: 'add_node',
+                element: newNode,
+                parent: nodeToDuplicate.parentNode,
+                execute: function() {
+                    this.parent.appendChild(this.element);
+                },
+                undo: function() {
+                    this.parent.removeChild(this.element);
+                }
+            };
+            action.execute();
+            recordAction(action);
+        }
+    }
+  });
+
+  // Delegate contextmenu event to .node-action elements
+  document.querySelector('.canvas').addEventListener('contextmenu', (e) => {
+    const action = e.target.closest('.node-action');
+    if (!action) return;
+
+    e.preventDefault();
+
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    contextMenu.style.left = `${mouseX}px`;
+    contextMenu.style.top = `${mouseY}px`;
+    contextMenu.style.display = 'flex';
+  });
+
+  document.addEventListener('click', () => {
+    contextMenu.style.display = 'none';
+  });
+
+  window.addEventListener('resize', () => {
+    contextMenu.style.display = 'none';
+  });
+
+  // Canvas panning logic
+  const canvas = document.querySelector('.canvas');
+  const viewport = document.querySelector('.viewport');
+  let isPanning = false;
+  let startX = 0, startY = 0;
+  let scrollLeft = 0, scrollTop = 0;
+
+  // Node dragging variables
+  let draggingNode = null;
+  let nodeOffsetX = 0;
+  let nodeOffsetY = 0;
+  let nodeInitialPosition = null;
+
+
+  // Node resizing variables
+  let resizingNode = null;
+  let initialWidth = 0;
+  let initialMouseX = 0;
+  let nodeInitialWidth = 0;
+
+  // Node Action Drag & Drop variables
+  let draggingAction = null;
+  let draggingActionOriginNode = null;
+  let placeholder = null;
+	let removedNodeSpace = null;
+  let draggingSidebarBlock = null;
+  let draggingActionInitialParent = null;
+  let draggingActionInitialNextSibling = null;
+
+  function applyViewportPadding() {
+    const canvasWidth = canvas.clientWidth;
+    const canvasHeight = canvas.clientHeight;
+    // Add extra space for all sides (top, right, bottom, left)
+    // Use half the canvas size for each side
+    const padX = Math.floor(canvasWidth / 2);
+    const padY = Math.floor(canvasHeight / 2);
+    viewport.style.padding = `${padY}px ${padX}px ${padY}px ${padX}px`;
+  }
+
+  // Center canvas on load
+  function centerCanvas() {
+    // Wait for padding to apply
+    const canvasWidth = canvas.clientWidth;
+    const canvasHeight = canvas.clientHeight;
+    const viewportWidth = viewport.scrollWidth;
+    const viewportHeight = viewport.scrollHeight;
+
+    canvas.scrollLeft = (viewportWidth - canvasWidth) / 2;
+    canvas.scrollTop = (viewportHeight - canvasHeight) / 2;
+  }
+
+  function clampCanvasScroll() {
+    const canvasWidth = canvas.clientWidth;
+    const canvasHeight = canvas.clientHeight;
+    const viewportWidth = viewport.scrollWidth * zoomLevel;
+    const viewportHeight = viewport.scrollHeight * zoomLevel;
+
+    const minScrollLeft = 0;
+    const maxScrollLeft = viewportWidth - canvasWidth;
+    const minScrollTop = 0;
+    const maxScrollTop = viewportHeight - canvasHeight;
+
+    if (canvas.scrollLeft < minScrollLeft) canvas.scrollLeft = minScrollLeft;
+    if (canvas.scrollLeft > maxScrollLeft) canvas.scrollLeft = maxScrollLeft;
+    if (canvas.scrollTop < minScrollTop) canvas.scrollTop = minScrollTop;
+    if (canvas.scrollTop > maxScrollTop) canvas.scrollTop = maxScrollTop;
+  }
+
+
+
+  // --- Zooming ---
+  let zoomLevel = 1;
+  const minZoom = 0.44;
+  const maxZoom = 1;
+  const zoomGrowth = 1.18; // 118% growth
+
+  function setZoom(level, centerX, centerY) {
+    const prevZoom = zoomLevel;
+    zoomLevel = Math.max(minZoom, Math.min(maxZoom, level));
+
+    // If no center point is provided, use the center of the canvas
+    if (typeof centerX !== 'number' || typeof centerY !== 'number') {
+        const canvasRect = canvas.getBoundingClientRect();
+        centerX = canvasRect.left + canvasRect.width / 2;
+        centerY = canvasRect.top + canvasRect.height / 2;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = centerX - rect.left;
+    const mouseY = centerY - rect.top;
+
+    const pointX = (canvas.scrollLeft + mouseX) / prevZoom;
+    const pointY = (canvas.scrollTop + mouseY) / prevZoom;
+
+    viewport.style.transform = `scale(${zoomLevel})`;
+    viewport.style.transformOrigin = '0 0';
+
+    const newScrollLeft = pointX * zoomLevel - mouseX;
+    const newScrollTop = pointY * zoomLevel - mouseY;
+
+    canvas.scrollLeft = newScrollLeft;
+    canvas.scrollTop = newScrollTop;
+
+    clampCanvasScroll();
+}
+
+  // Unified mousedown handler for canvas/viewport
+  document.addEventListener('mousedown', function(e) {
+    const resizeHandle = e.target.closest('.resize-handle');
+    if (resizeHandle && e.button === 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        resizingNode = resizeHandle.closest('.node');
+        initialWidth = resizingNode.offsetWidth;
+        nodeInitialWidth = initialWidth;
+        initialMouseX = e.clientX;
+        document.body.style.userSelect = 'none';
+        return;
+    }
+    const block = e.target.closest('.block');
+    if (block && e.button === 0) {
+        if (e.target.tagName.toLowerCase() === 'input') {
+            return;
+        }
+
+				draggingSidebarBlock = block.cloneNode(true);
+				const blockIcon = block.querySelector('.block-icon');
+				draggingSidebarBlock.isEvent = blockIcon && blockIcon.classList.contains('event');
+        draggingSidebarBlock.isTransformed = false;
+
+        document.body.appendChild(draggingSidebarBlock);
+        draggingSidebarBlock.classList.add('dragging');
+
+        const rect = block.getBoundingClientRect();
+        draggingSidebarBlock.offsetFromMouseX = e.clientX - rect.left;
+        draggingSidebarBlock.offsetFromMouseY = e.clientY - rect.top;
+
+        draggingSidebarBlock.style.left = (e.clientX - draggingSidebarBlock.offsetFromMouseX) + 'px';
+        draggingSidebarBlock.style.top = (e.clientY - draggingSidebarBlock.offsetFromMouseY) + 'px';
+
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+        return;
+    }
+
+    // Check for action dragging first (highest priority)
+    const action = e.target.closest('.node-action');
+    if (action && e.button === 0) {
+        // If the target is an input field, don't start dragging the action.
+        if (e.target.tagName.toLowerCase() === 'input') {
+            return;
+        }
+        draggingAction = action;
+        draggingActionOriginNode = action.closest('.node');
+        draggingActionInitialParent = action.parentElement;
+        draggingActionInitialNextSibling = action.nextElementSibling;
+
+        const rect = action.getBoundingClientRect();
+        draggingAction.offsetFromMouseX = e.clientX - rect.left;
+        draggingAction.offsetFromMouseY = e.clientY - rect.top;
+
+        // Create a placeholder in the node
+        placeholder = document.createElement('div');
+        placeholder.className = 'node-space placeholder';
+        placeholder.style.height = action.offsetHeight + 'px';
+        action.parentNode.insertBefore(placeholder, action.nextSibling);
+
+        // Make the dragged action follow the mouse
+        action.style.position = 'fixed';
+        action.style.zIndex = '10000';
+        action.style.pointerEvents = 'none';
+        action.style.left = e.clientX - draggingAction.offsetFromMouseX + 'px';
+        action.style.top = e.clientY - draggingAction.offsetFromMouseY + 'px';
+
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+        return;
+    }
+
+    // Check for node dragging (via the node-header)
+    const nodeHeader = e.target.closest('.node-header');
+    if (nodeHeader && e.button === 0) {
+        draggingNode = nodeHeader.closest('.node');
+        nodeInitialPosition = { left: draggingNode.style.left, top: draggingNode.style.top };
+        // Get mouse position relative to node
+        const rect = draggingNode.getBoundingClientRect();
+        nodeOffsetX = e.clientX - rect.left;
+        nodeOffsetY = e.clientY - rect.top;
+
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+        return; // Prevent canvas panning
+    }
+
+    // Canvas panning (lowest priority)
+    if (e.target.closest('.viewport') && e.button === 0) {
+      isPanning = true;
+      canvas.style.cursor = 'grab';
+      startX = e.clientX;
+      startY = e.clientY;
+      scrollLeft = canvas.scrollLeft;
+      scrollTop = canvas.scrollTop;
+      e.preventDefault();
+    }
+  });
+
+  // Unified mousemove handler
+  document.addEventListener('mousemove', function(e) {
+    if (resizingNode) {
+        const dx = e.clientX - initialMouseX;
+        let newWidth = initialWidth + dx;
+        newWidth = Math.max(425, Math.min(newWidth, 850));
+        resizingNode.style.width = newWidth + 'px';
+        return;
+    }
+		if (draggingSidebarBlock && !draggingSidebarBlock.parentNode) {
+    draggingSidebarBlock = null;
+    return;
+	}
+    if (draggingSidebarBlock) {
+        draggingSidebarBlock.style.left = (e.clientX - draggingSidebarBlock.offsetFromMouseX) + 'px';
+        draggingSidebarBlock.style.top = (e.clientY - draggingSidebarBlock.offsetFromMouseY) + 'px';
+
+        const canvasRect = canvas.getBoundingClientRect();
+        const isOverCanvas = e.clientX > canvasRect.left && e.clientX < canvasRect.right &&
+                             e.clientY > canvasRect.top && e.clientY < canvasRect.bottom;
+
+        if (isOverCanvas && draggingSidebarBlock.isEvent && !draggingSidebarBlock.isTransformed) {
+            draggingSidebarBlock.isTransformed = true;
+
+            const node = createNodeFromBlock(draggingSidebarBlock);
+            
+            draggingSidebarBlock.replaceWith(node);
+            draggingSidebarBlock = node;
+            draggingSidebarBlock.isEvent = true;
+            draggingSidebarBlock.isTransformed = true;
+
+            // Add animation class
+            node.classList.add('unfolding');
+            node.style.transform = 'scale(0)';
+            node.style.opacity = '0';
+            
+            // Position it
+            const rect = node.getBoundingClientRect();
+            draggingSidebarBlock.offsetFromMouseX = rect.width / 2;
+            draggingSidebarBlock.offsetFromMouseY = 20; // approx height of header
+            node.style.left = (e.clientX - draggingSidebarBlock.offsetFromMouseX) + 'px';
+            node.style.top = (e.clientY - draggingSidebarBlock.offsetFromMouseY) + 'px';
+
+            // Trigger the animation
+            setTimeout(() => {
+                node.style.transform = 'scale(1)';
+                node.style.opacity = '1';
+            }, 10);
+        }
+        return;
+    }
+
+		if (draggingAction) {
+			// Move the dragged action with the mouse
+			const offsetX = draggingAction.offsetFromMouseX || 0;
+			const offsetY = draggingAction.offsetFromMouseY || 0;
+			draggingAction.style.left = e.clientX - offsetX + 'px';
+			draggingAction.style.top = e.clientY - offsetY + 'px';
+
+			// Find node-space under cursor
+			let foundSpace = null;
+			document.querySelectorAll('.node-space').forEach(space => {
+				const rect = space.getBoundingClientRect();
+				if (
+					e.clientX >= rect.left &&
+					e.clientX <= rect.right &&
+					e.clientY >= rect.top &&
+					e.clientY <= rect.bottom
+				) {
+					foundSpace = space;
+				}
+			});
+			// Manage drag-over styling for node-spaces
+			document.querySelectorAll('.node-space').forEach(space => {
+				if (space === foundSpace) space.classList.add('drag-over');
+				else space.classList.remove('drag-over');
+			});
+
+			// If hovering over a node-space, move placeholder there
+			if (foundSpace && foundSpace.parentNode) {
+				foundSpace.parentNode.insertBefore(placeholder, foundSpace);
+			} else {
+				// Otherwise, check if hovering over a node-action (not the dragged one)
+				let foundAction = null;
+				document.querySelectorAll('.node-action').forEach(action => {
+					if (action === draggingAction) return;
+					const rect = action.getBoundingClientRect();
+					if (
+						e.clientX >= rect.left &&
+						e.clientX <= rect.right &&
+						e.clientY >= rect.top &&
+						e.clientY <= rect.bottom
+					) {
+						foundAction = action;
+					}
+				});
+				if (foundAction && foundAction.parentNode) {
+					// Insert placeholder before the hovered action
+					foundAction.parentNode.insertBefore(placeholder, foundAction);
+					// Move the hovered action after the placeholder
+					if (placeholder.nextSibling !== foundAction) {
+						placeholder.parentNode.insertBefore(foundAction, placeholder.nextSibling);
+					}
+				}
+			}
+
+			return;
+		}
+
+    if (draggingNode) {
+      // Correctly calculate node position considering zoom and scroll
+      const canvasRect = canvas.getBoundingClientRect();
+      let x = (e.clientX - nodeOffsetX - canvasRect.left + canvas.scrollLeft) / zoomLevel;
+      let y = (e.clientY - nodeOffsetY - canvasRect.top + canvas.scrollTop) / zoomLevel;
+
+      // Clamp node position to stay inside the viewport
+      x = Math.max(0, Math.min(x, viewport.scrollWidth - draggingNode.offsetWidth));
+      y = Math.max(0, Math.min(y, viewport.scrollHeight - draggingNode.offsetHeight));
+
+      draggingNode.style.left = x + 'px';
+      draggingNode.style.top = y + 'px';
+      return;
+    }
+
+    if (isPanning) {
+      const dx = startX - e.clientX;
+      const dy = startY - e.clientY;
+      canvas.scrollLeft = scrollLeft + dx;
+      canvas.scrollTop = scrollTop + dy;
+      clampCanvasScroll();
+    }
+  });
+
+  // Unified mouseup handler
+	document.addEventListener('mouseup', function(e) {
+  	if (resizingNode) {
+        const finalWidth = resizingNode.offsetWidth;
+        if (nodeInitialWidth !== finalWidth) {
+            recordAction({
+                type: 'resize_node',
+                nodeUid: resizingNode.dataset.uid, // Use UID
+                oldWidth: nodeInitialWidth,
+                newWidth: finalWidth,
+                execute: function() {
+                    const node = document.querySelector(`[data-uid="${this.nodeUid}"]`); // Select by UID
+                    if (node) {
+                        node.style.width = this.newWidth + 'px';
+                    }
+                },
+                undo: function() {
+                    const node = document.querySelector(`[data-uid="${this.nodeUid}"]`); // Select by UID
+                    if (node) {
+                        node.style.width = this.oldWidth + 'px';
+                    }
+                }
+            });
+        }
+        resizingNode = null;
+        document.body.style.userSelect = '';
+        return;
+    }
+    const sidebar = document.querySelector('.sidebar');
+    const header = document.querySelector('.header');
+    const sidebarRect = sidebar.getBoundingClientRect();
+    const headerRect = header.getBoundingClientRect();
+
+    const isOverSidebar = e.clientX >= sidebarRect.left && e.clientX <= sidebarRect.right &&
+                          e.clientY >= sidebarRect.top && e.clientY <= sidebarRect.bottom;
+    const isOverHeader = e.clientX >= headerRect.left && e.clientX <= headerRect.right &&
+                         e.clientY >= headerRect.top && e.clientY <= headerRect.bottom;
+
+    if (draggingSidebarBlock) {
+        if (isOverSidebar || isOverHeader) {
+            draggingSidebarBlock.remove();
+        } else {
+            const canvasRect = canvas.getBoundingClientRect();
+            const isOverCanvas = e.clientX > canvasRect.left && e.clientX < canvasRect.right &&
+                                 e.clientY > canvasRect.top && e.clientY < canvasRect.bottom;
+
+            if (isOverCanvas) {
+                if (draggingSidebarBlock.isEvent) {
+                    draggingSidebarBlock.classList.remove('dragging', 'unfolding');
+                    draggingSidebarBlock.style.transition = 'none';
+
+                    const nodeRect = draggingSidebarBlock.getBoundingClientRect();
+                    const x = (nodeRect.left - canvasRect.left + canvas.scrollLeft) / zoomLevel;
+                    const y = (nodeRect.top - canvasRect.top + canvas.scrollTop) / zoomLevel;
+
+                    draggingSidebarBlock.style.left = x + 'px';
+                    draggingSidebarBlock.style.top = y + 'px';
+                    draggingSidebarBlock.style.transform = '';
+                    draggingSidebarBlock.style.opacity = '';
+
+                    const action = {
+                        type: 'add_node',
+                        element: draggingSidebarBlock,
+                        parent: viewport,
+                        execute: function() {
+                            this.parent.appendChild(this.element);
+                        },
+                        undo: function() {
+                            this.parent.removeChild(this.element);
+                        }
+                    };
+                    action.execute();
+                    recordAction(action);
+                } else {
+                    let foundSpace = null;
+                    document.querySelectorAll('.node-space').forEach(space => {
+                        const rect = space.getBoundingClientRect();
+                        if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                            e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                            foundSpace = space;
+                        }
+                    });
+
+                    if (foundSpace) {
+                        const newAction = createActionFromBlock(draggingSidebarBlock);
+                        foundSpace.parentNode.insertBefore(newAction, foundSpace);
+                        updateNodeSpaces(foundSpace.closest('.node'));
+                        const action = {
+                            type: 'add_action',
+                            element: newAction,
+                            parent: foundSpace.parentNode,
+                            nextSibling: foundSpace.nextElementSibling, // The element after the placeholder
+                            execute: function() {
+                                this.parent.insertBefore(this.element, this.nextSibling);
+                            },
+													undo: function() {
+															if (this.element && this.element.parentNode === this.parent) {
+																	this.parent.removeChild(this.element);
+															}
+													}
+                        };
+                        recordAction(action);
+                    }
+                    // Always remove the dragging element, whether placed or not
+                    draggingSidebarBlock.remove();
+                }
+            } else {
+                draggingSidebarBlock.remove();
+            }
+        }
+
+        draggingSidebarBlock = null;
+        document.body.style.userSelect = '';
+        return;
+    }
+
+		if (draggingAction) {
+				if (isOverSidebar || isOverHeader) {
+						// Store references BEFORE removing from DOM
+						const actionElement = draggingAction;
+						const parentElement = draggingAction.parentElement;
+						const nextSibling = draggingAction.nextElementSibling;
+						const node = draggingAction.closest('.node');
+						
+						// Create the delete action BEFORE removing from DOM
+						const action = {
+								type: 'delete_action',
+								element: actionElement,
+								parent: parentElement,
+								nextSibling: nextSibling,
+								node: node,
+								execute: function() {
+										if (this.element && this.parent && this.parent.contains(this.element)) {
+												this.parent.removeChild(this.element);
+												if (this.node) updateNodeSpaces(this.node);
+										}
+								},
+								undo: function() {
+										if (this.element && this.parent) {
+												if (this.nextSibling && this.parent.contains(this.nextSibling)) {
+														this.parent.insertBefore(this.element, this.nextSibling);
+												} else {
+														this.parent.appendChild(this.element);
+												}
+												if (this.node) updateNodeSpaces(this.node);
+										}
+								}
+						};
+						action.execute();
+						recordAction(action);
+        } else {
+            let foundSpace = null;
+            document.querySelectorAll('.node-space').forEach(space => {
+                const rect = space.getBoundingClientRect();
+                if (
+                    e.clientX >= rect.left &&
+                    e.clientX <= rect.right &&
+                    e.clientY >= rect.top &&
+                    e.clientY <= rect.bottom
+                ) {
+                    foundSpace = space;
+                }
+            });
+
+            if (foundSpace && foundSpace.parentNode) {
+                foundSpace.parentNode.insertBefore(draggingAction, foundSpace);
+            } else if (placeholder && placeholder.parentNode) {
+                placeholder.parentNode.insertBefore(draggingAction, placeholder);
+            } else {
+                if (draggingAction.parentNode) {
+                    draggingAction.parentNode.removeChild(draggingAction);
+                }
+            }
+        }
+
+			// Record action move if position changed
+            const finalParent = draggingAction.parentElement;
+            const finalNextSibling = draggingAction.nextElementSibling;
+
+            if (draggingActionInitialParent !== finalParent || draggingActionInitialNextSibling !== finalNextSibling) {
+                recordAction({
+                    type: 'move_action',
+                    element: draggingAction,
+                    oldParent: draggingActionInitialParent,
+                    oldIndex: Array.from(draggingActionInitialParent.children).indexOf(draggingAction),
+                    newParent: finalParent,
+                    newIndex: Array.from(finalParent.children).indexOf(draggingAction),
+                    execute: function() {
+                        if (this.newParent.children.length > this.newIndex) {
+                            this.newParent.insertBefore(this.element, this.newParent.children[this.newIndex]);
+                        } else {
+                            this.newParent.appendChild(this.element);
+                        }
+                    },
+                    undo: function() {
+                        if (this.oldParent.children.length > this.oldIndex) {
+                            this.oldParent.insertBefore(this.element, this.oldParent.children[this.oldIndex]);
+                        } else {
+                            this.oldParent.appendChild(this.element);
+                        }
+                    }
+                });
+            }
+
+			// Reset dragged action styles
+			draggingAction.style.position = '';
+			draggingAction.style.zIndex = '';
+			draggingAction.style.pointerEvents = '';
+			draggingAction.style.left = '';
+			draggingAction.style.top = '';
+			draggingAction.style.opacity = '';
+			delete draggingAction.offsetFromMouseX;
+			delete draggingAction.offsetFromMouseY;
+
+			if (placeholder && placeholder.parentNode) {
+				placeholder.parentNode.removeChild(placeholder);
+			}
+
+			document.querySelectorAll('.node').forEach(updateNodeSpaces);
+
+			document.querySelectorAll('.node-space.drag-over').forEach(s => s.classList.remove('drag-over'));
+
+			draggingAction = null;
+			draggingActionOriginNode = null;
+			placeholder = null;
+			document.body.style.userSelect = '';
+			return;
+		}
+
+  if (draggingNode) {
+            const finalPosition = { left: draggingNode.style.left, top: draggingNode.style.top };
+            if (nodeInitialPosition.left !== finalPosition.left || nodeInitialPosition.top !== finalPosition.top) {
+                recordAction({
+                    type: 'move_node',
+                    nodeUid: draggingNode.dataset.uid, // Use UID
+                    oldPosition: nodeInitialPosition,
+                    newPosition: finalPosition,
+                    execute: function() {
+                        const node = document.querySelector(`[data-uid="${this.nodeUid}"]`); // Select by UID
+                        if (node) {
+                            node.style.left = this.newPosition.left;
+                            node.style.top = this.newPosition.top;
+                        }
+                    },
+                    undo: function() {
+                        const node = document.querySelector(`[data-uid="${this.nodeUid}"]`); // Select by UID
+                        if (node) {
+                            node.style.left = this.oldPosition.left;
+                            node.style.top = this.oldPosition.top;
+                        }
+                    }
+                });
+            }
+			draggingNode = null;
+			document.body.style.userSelect = '';
+			return;
+		}
+
+		if (isPanning) {
+			isPanning = false;
+			canvas.style.cursor = '';
+		}
+	});
+
+
+  applyViewportPadding();
+  centerCanvas();
+
+  window.addEventListener('resize', () => {
+    applyViewportPadding();
+    contextMenu.style.display = 'none';
+  });
+
+  // Zoom controls
+  document.querySelector('.zoom-in').addEventListener('click', () => {
+    setZoom(zoomLevel * zoomGrowth);
+  });
+
+  document.querySelector('.zoom-out').addEventListener('click', () => {
+    setZoom(zoomLevel / zoomGrowth);
+  });
+
+  // Mouse wheel zoom
+  canvas.addEventListener('wheel', function(e) {
+    if (e.ctrlKey) return;
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      setZoom(zoomLevel * zoomGrowth, e.clientX, e.clientY);
+    } else if (e.deltaY > 0) {
+      setZoom(zoomLevel / zoomGrowth, e.clientX, e.clientY);
+    }
+  }, { passive: false });
+
+  // Center button
+  document.querySelector('.center').addEventListener('click', () => {
+    setZoom(1);
+    centerCanvas();
+  });
+
+  // Hide Side Panel Button
+  const sidebar = document.querySelector('.sidebar');
+  const category = document.querySelector('.category');
+  const collapseBtn = document.querySelector('.collapse');
+  const leftControls = document.querySelector('.left-controls');
+  let sidebarHidden = false;
+
+	// Smoothly toggle sidebar without touching the top header
+	function updateSidebarVisibility() {
+		sidebarHidden = !sidebarHidden;
+		document.body.classList.toggle('sidebar-collapsed', sidebarHidden);
+
+		// accessibility / pointer behavior
+		sidebar.setAttribute('aria-hidden', sidebarHidden ? 'true' : 'false');
+		category.setAttribute('aria-hidden', 'false');
+	}
+	collapseBtn.addEventListener('click', updateSidebarVisibility);
+
+  // Call clamp after any scroll
+  canvas.addEventListener('scroll', clampCanvasScroll);
+
+  // Initial node-space setup for all nodes
+  document.querySelectorAll('.node').forEach(updateNodeSpaces);
+
+  // Handle editable fields
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('field')) {
+      e.target.focus();
+    }
+  });
+
+  let currentFocusedField = null;
+  let currentFocusedFieldOldValue = '';
+
+  document.addEventListener('focusin', (e) => {
+      if (e.target.classList.contains('field')) {
+          currentFocusedField = e.target;
+          currentFocusedFieldOldValue = e.target.value || e.target.textContent;
+      }
+  });
+
+  document.addEventListener('focusout', (e) => {
+      if (currentFocusedField && e.target === currentFocusedField) {
+          const newValue = e.target.value || e.target.textContent;
+          if (currentFocusedFieldOldValue !== newValue) {
+              const targetElement = currentFocusedField.closest('.node, .node-action');
+              recordAction({
+                  type: 'change_field',
+                  elementUid: targetElement.dataset.uid,
+                  fieldElement: currentFocusedField, // Keep direct reference
+                  oldValue: currentFocusedFieldOldValue,
+                  newValue: newValue,
+                  execute: function() {
+                      this.fieldElement.value = this.newValue;
+                      this.fieldElement.textContent = this.newValue;
+                      resizeInput(this.fieldElement);
+                  },
+                  undo: function() {
+                      this.fieldElement.value = this.oldValue;
+                      this.fieldElement.textContent = this.oldValue;
+                      resizeInput(this.fieldElement);
+                  }
+              });
+          }
+          currentFocusedField = null;
+          currentFocusedFieldOldValue = '';
+      }
+  });
+
+  document.querySelectorAll('.field').forEach(field => {
+    field.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.blur();
+      }
+    });
+
+    field.addEventListener('blur', function() {
+      if (!this.textContent.trim()) {
+        this.textContent = '<value>';
+      }
+    });
+
+    field.addEventListener('paste', function(e) {
+      e.preventDefault();
+      const text = e.clipboardData.getData('text/plain');
+      document.execCommand('insertText', false, text);
+    });
+  });
+
+  const categoryMap = {
+    'event': 'Events',
+    'log': 'Console',
+    'logic': 'Logic',
+    'loops': 'Loops',
+    'looks': 'Looks',
+    'hierarchy': 'Hierarchy',
+    'navigation': 'Navigation',
+    'math-variables': 'Math & Variables',
+    'audio': 'Audio',
+    'input': 'Input',
+    'network': 'Network',
+    'cookies': 'Cookies',
+    'time': 'Time',
+    'color': 'Color',
+    'strings': 'Strings',
+    'tables': 'Tables',
+    'functions': 'Functions'
+  };
+
+  function scrollToSection(button) {
+    const categoryClass = Array.from(button.classList).find(c => c !== 'nav-button');
+    if (!categoryClass) return;
+    
+    const sectionTitleText = categoryMap[categoryClass];
+    if (!sectionTitleText) return;
+
+    const sidebarItems = document.querySelector('.sidebar-items');
+    const sectionTitles = sidebarItems.querySelectorAll('.section-title');
+    const targetSection = Array.from(sectionTitles).find(title => title.textContent.trim() === sectionTitleText);
+
+    if (targetSection) {
+        const targetPosition = targetSection.offsetTop - sidebarItems.offsetTop;
+        smoothScroll(sidebarItems, targetPosition, 500);
+    }
+  }
+
+  document.querySelector('.category').addEventListener('click', (e) => {
+    const button = e.target.closest('.nav-button');
+    if (!button) return;
+
+    const sidebarIsCollapsed = document.body.classList.contains('sidebar-collapsed');
+
+    if (sidebarIsCollapsed) {
+        updateSidebarVisibility();
+        setTimeout(() => {
+            scrollToSection(button);
+        }, 300);
+    } else {
+        scrollToSection(button);
+    }
+  });
+});
+
+function smoothScroll(element, to, duration) {
+    const start = element.scrollTop;
+    const change = to - start;
+    let startTime = null;
+
+    function animateScroll(currentTime) {
+        if (startTime === null) startTime = currentTime;
+        const timeElapsed = currentTime - startTime;
+        const run = easeOutCubic(timeElapsed, start, change, duration);
+        element.scrollTop = run;
+        if (timeElapsed < duration) requestAnimationFrame(animateScroll);
+    }
+
+    function easeOutCubic(t, b, c, d) {
+        t /= d;
+        t--;
+        return c * (t * t * t + 1) + b;
+    }
+
+    requestAnimationFrame(animateScroll);
+}
+
+function resizeInput(input) {
+  const span = document.createElement('span');
+  span.style.visibility = 'hidden';
+  span.style.position = 'absolute';
+  span.style.font = getComputedStyle(input).font;
+  span.textContent = input.value || input.placeholder;
+  document.body.appendChild(span);
+  input.style.width = span.offsetWidth + parseInt(getComputedStyle(input).paddingLeft) 
+                    + parseInt(getComputedStyle(input).paddingRight) + 2 + 'px';
+  span.remove();
+}
+
+// Apply to all inputs initially and on input events
+document.querySelectorAll('.field').forEach(input => {
+  input.addEventListener('input', () => resizeInput(input));
+  resizeInput(input); // initial sizing
+});
+
+function createNodeFromBlock(block) {
+    const node = document.createElement('div');
+    node.className = 'node dragging';
+
+    // Set IDs and data attributes
+		const descriptionSpan = block.querySelector(':scope > span');
+		const signature = descriptionSpan ? getSignatureFromElement(descriptionSpan) : null;
+    const numericId = findIdBySignature(signature, true);
+    if (numericId !== null) {
+        node.id = `event-${numericId}`;
+    }
+    node.dataset.globalid = generateRandomGlobalId();
+    node.dataset.uid = generateUniqueId();
+
+    const originalBlockIcon = block.querySelector('.block-icon');
+    let iconHTML = '';
+    if (originalBlockIcon) {
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'node-icon-container';
+        iconContainer.innerHTML = originalBlockIcon.innerHTML;
+        iconContainer.style.color = getComputedStyle(originalBlockIcon).color;
+        iconHTML = iconContainer.outerHTML;
+    }
+
+    // 1. Create a deep clone of the block to work with
+    const tempBlock = block.cloneNode(true);
+
+    // 2. Remove the icon from the clone, so it's not part of the title
+    const iconInTemp = tempBlock.querySelector('.block-icon');
+    if (iconInTemp) {
+        iconInTemp.remove();
+    }
+
+    // 3. Find all <input> fields in the original block and the temporary clone
+    const originalInputs = block.querySelectorAll('.field');
+    const clonedInputs = tempBlock.querySelectorAll('.field');
+
+    // 4. Loop through and transfer the current 'value' from the original input to the cloned input
+    originalInputs.forEach((originalInput, index) => {
+        const clonedInput = clonedInputs[index];
+        if (originalInput.value) {
+            clonedInput.setAttribute('value', originalInput.value);
+            clonedInput.value = originalInput.value;
+        }
+    });
+
+    // 5. Get the innerHTML from the prepared temporary clone.
+    const nodeTitleContentHTML = tempBlock.innerHTML.trim();
+
+    // --- Build the Node Structure ---
+    node.innerHTML = `
+        <div class="node-header">
+            <div style="display:flex;align-items:center;gap:12px">
+                <div class="node-title">${nodeTitleContentHTML}</div>
+            </div>
+            <div class="down-icon"><span class="material-icons">south</span></div>
+            <div class="node-actions">
+                <div class="icon-btn duplicate"><span class="material-symbols-outlined">content_copy</span></div>
+                <div class="icon-btn trash"><span class="material-symbols-outlined">delete</span></div>
+            </div>
+        </div>
+        <div class="node-body" id="${node.id}-body">
+            </div>
+		<div class="resize-handle"></div>
+    `;
+
+    // 5. Re-attach event listeners to the new <input> fields in the canvas node
+    node.querySelectorAll('.field').forEach(field => {
+      field.addEventListener('input', () => resizeInput(field));
+      resizeInput(field);
+    });
+
+    updateNodeSpaces(node);
+    return node;
+}
+
+function createActionFromBlock(block) {
+    const newAction = document.createElement('div');
+    newAction.className = 'node-action';
+    
+    // Get IDs and add them to the element
+		const descriptionSpan = block.querySelector(':scope > span');
+		const signature = descriptionSpan ? getSignatureFromElement(descriptionSpan) : null;
+    const numericId = findIdBySignature(signature, false);
+    if (numericId !== null) {
+        newAction.id = `action-${numericId}`;
+    }
+    newAction.dataset.globalid = generateRandomGlobalId();
+    newAction.dataset.uid = generateUniqueId(); // For undo/redo to work correctly
+
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'node-icon-container';
+    
+    const originalBlockIcon = block.querySelector('.block-icon');
+    if (originalBlockIcon) {
+        iconContainer.innerHTML = originalBlockIcon.innerHTML;
+        iconContainer.style.color = getComputedStyle(originalBlockIcon).color;
+    }
+    
+    const textSpan = block.querySelector('.block-icon + span');
+    if (textSpan) {
+        newAction.appendChild(iconContainer);
+        newAction.appendChild(textSpan.cloneNode(true));
+    }
+
+    newAction.querySelectorAll('.field').forEach(field => {
+        field.addEventListener('input', () => resizeInput(field));
+        resizeInput(field);
+    });
+
+    return newAction;
+}
+
+const idsTxt = `
+=== Events ===
+
+- When website loaded... - ID: 0
+- When <button> pressed... - ID: 1
+- When <key> pressed... - ID: 2
+- When mouse enters <object> ... - ID: 3
+- When mouse leaves <object> ... - ID: 5
+- Define function <function> - ID: 6
+- When <donation> bought... - ID: 7
+- When <input> submitted... - ID: 8
+- When message received... - ID: 9
+- When <object> changed... - ID: 10
+
+=== Actions ===
+
+- Log <any> - ID: 0
+- Warn <any> - ID: 1
+- Error <any> - ID: 2
+- Wait <number> seconds - ID: 3
+- Redirect to <string> - ID: 4
+- Play audio <id> → <variable?> - ID: 5
+- Stop all audio - ID: 7
+- Make <object> invisible - ID: 8
+- Make <object> visible - ID: 9
+- Set <object> text to <string> - ID: 10
+- Set <variable> to <any> - ID: 11
+- Increase <variable> by <number> - ID: 12
+- Decrease <variable> by <number> - ID: 13
+- Multiply <variable> by <number> - ID: 14
+- Divide <variable> by <number> - ID: 15
+- Round <variable> - ID: 16
+- Floor <variable> - ID: 17
+- If <any> is equal to <any> - ID: 18
+- If <any> is not equal to <any> - ID: 19
+- If <any> is greater than <any> - ID: 20
+- If <any> is lower than <any> - ID: 21
+- Repeat <number> times - ID: 22
+- Repeat forever - ID: 23
+- Break - ID: 24
+- end - ID: 25
+- Play looped audio <id> → <variable?> - ID: 26
+- Set <var> to random <n> - <n> - ID: 27
+- Get text from <input> → <variable> - ID: 30
+- Set <property> of <object> to <any> - ID: 31
+- Broadcast <message> across page - ID: 32
+- Broadcast <message> across site - ID: 33
+- Set <cookie> to <any> - ID: 34
+- Increase <cookie> by <number> - ID: 35
+- Get cookie <cookie> → <variable> - ID: 36
+- If <string> contains <string> - ID: 37
+- If <string> doesn't contain <string> - ID: 38
+- Get <property> of <object> → <variable> - ID: 39
+- Raise <variable> to the power of <number> - ID: 40
+- <variable> modulo <number> - ID: 41
+- Sub <variable> <start> - <end> - ID: 42
+- Replace <string> in <variable> by <string> - ID: 43
+- If <variable> AND <variable> - ID: 44
+- If <variable> OR <variable> - ID: 45
+- If <variable> NOR <variable> - ID: 46
+- If <variable> XOR <variable> - ID: 47
+- Get length of <string> → <variable> - ID: 48
+- Duplicate <object> → <variable> - ID: 49
+- Delete <object> - ID: 50
+- Get local username → <variable> - ID: 51
+- Get local user ID → <variable> - ID: 52
+- Get local display name → <variable> - ID: 53
+- Create table <table> - ID: 54
+- Set entry <entry> of <table> to <any> - ID: 55
+- Get entry <entry> of <table> → <variable> - ID: 56
+- Split <string> <separator> → <table> - ID: 57
+- Parent <object> under <object> - ID: 58
+- Get length of <array> → <variable> - ID: 59
+- Delete cookie <cookie> - ID: 62
+- Run function in background <function> <tuple> - ID: 63
+- Set entry <entry> of <table> to <object> - ID: 66
+- Get query string parameter <string> → <variable> - ID: 67
+- Get unix timestamp → <variable> - ID: 68
+- Lower <string> → <variable> - ID: 69
+- Upper <string> → <variable> - ID: 70
+- Format current date/time <format> → <variable> - ID: 71
+- Format from unix <number> <format> → <variable> - ID: 72
+- Set volume of <variable> to <number> - ID: 73
+- Stop audio <variable> - ID: 74
+- Pause audio <variable> - ID: 75
+- Resume audio <variable> - ID: 76
+- Set speed of <variable> to <number> - ID: 77
+- Ceil <variable> - ID: 78
+- If left mouse button down - ID: 79
+- If middle mouse button down - ID: 80
+- If right mouse button down - ID: 81
+- If <key> down - ID: 82
+- Get tick → <variable> - ID: 83
+- Get viewport size → <x> <y> - ID: 84
+- Get cursor position → <x> <y> - ID: 85
+- Run function <function> <tuple> → <variable?> - ID: 87
+- Tween <property> of <object> to <any> - <time> <style> <direction> - ID: 88
+- Insert <any> at position <number?> of <array> - ID: 89
+- Delete entry <entry> of <table> - ID: 90
+- Remove entry at position <number?> of <array> - ID: 91
+- If <variable> exists - ID: 92
+- If <variable> doesn't exist - ID: 93
+- Set <property> of <variable> to <any> - ID: 94
+- Get <property> of <variable> → <variable> - ID: 95
+- Delete <variable> - ID: 96
+- Get parent of <object> → <variable> - ID: 97
+- Find ancestor named <string> in <object> → <variable> - ID: 98
+- Find child named <string> in <object> → <variable> - ID: 99
+- Find descendant named <string> in <object> → <variable> - ID: 100
+- Get children of <object> → <table> - ID: 101
+- Get descendants of <object> → <table> - ID: 102
+- If <object> is ancestor of <object> - ID: 103
+- If <object> is child of <object> - ID: 104
+- If <object> is descendant of <object> - ID: 105
+- Set <object> image to <id> - ID: 106
+- Set <object> image to avatar of <userid> <resolution?> - ID: 107
+- If dark theme enabled - ID: 108
+- Concatenate <string> with <string> → <variable> - ID: 109
+- Join <array> using <string> → <variable> - ID: 110
+- else - ID: 112
+- Iterate through <table> ({l!index},{l!value}) - ID: 113
+- Run math function <function> <tuple> → <variable> - ID: 114
+- Return <any> - ID: 115
+- Get server unix timestamp → <variable> - ID: 116
+- Get URL → <variable> - ID: 117
+- Get timezone → <variable> - ID: 118
+- Convert <hex> to RGB → <variable> - ID: 119
+- Convert <hex> to HSV → <variable> - ID: 120
+- Convert <RGB> to hex → <variable> - ID: 121
+- Convert <HSV> to hex → <variable> - ID: 122
+- Lerp <hex> to <hex> by <alpha> → <variable> - ID: 123
+- Comment... - ID: 124
+`;
+
+const eventIdMap = new Map();
+const actionIdMap = new Map();
+
+let currentMap = null;
+idsTxt.split('\n').forEach(line => {
+    if (line.includes('=== Events ===')) {
+        currentMap = eventIdMap;
+        return;
+    }
+    if (line.includes('=== Actions ===')) {
+        currentMap = actionIdMap;
+        return;
+    }
+    if (line.includes('=== ID collisions ===')) {
+        currentMap = null; // Stop parsing
+        return;
+    }
+
+    if (currentMap) {
+        const match = line.match(/^- (.*) - ID: (\d+)/);
+        if (match) {
+            let key = match[1].trim();
+            const id = match[2];
+            currentMap.set(key, id);
+        }
+    }
+	document.querySelector('.save-btn').addEventListener('click', saveScript);
+});
+
+function getBlockId(block, isEvent) {
+    const map = isEvent ? eventIdMap : actionIdMap;
+    const span = block.querySelector('.block-icon + span');
+    if (!span) return null;
+
+    const clone = span.cloneNode(true);
+    clone.querySelectorAll('input.field').forEach(input => {
+        input.replaceWith(input.placeholder);
+    });
+    let signature = clone.textContent.trim().replace(/\s+/g, ' ');
+
+    if (map.has(signature)) {
+        return map.get(signature);
+    }
+    
+    const signatureWithEllipsis = signature + '...';
+    if (map.has(signatureWithEllipsis)) {
+        return map.get(signatureWithEllipsis);
+    }
+
+    for (const [key, value] of map.entries()) {
+        if (key.endsWith('...') && signature === key.slice(0, -3).trim()) {
+            return value;
+        }
+    }
+
+    return null;
+}
+</script>
+</body>
+</html>
